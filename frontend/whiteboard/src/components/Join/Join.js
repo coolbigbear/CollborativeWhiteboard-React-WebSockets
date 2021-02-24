@@ -19,6 +19,9 @@ const Join = () => {
 
     function joinAlreadyCreatedRoom() {
         history.push(`/room?room=${room}&name=${name}`)
+        setRoom(room);
+        setName(name);
+        console.log("joining an existing room");
     }
 
     return (
@@ -27,9 +30,9 @@ const Join = () => {
                 <h1 className="heading">Join</h1>
                 <div><input placeholder="Name" className="joinInput" type="text" onChange={(event) => setName(event.target.value)}></input></div>
                 <div><input placeholder="Room" className="joinInput mt-20" type="text" onChange={(event) => setRoom(event.target.value)}></input></div>
-                {/* <Link onClick={event => (!name || !room) ? event.preventDefault() : null} to={`/chat?name=${name}&room=${room}`}>
+                {/* <Link onClick={event => (!name || !room) ? event.preventDefault() : null} to={`/room?room=${room}&name=${name}`}>
                     <button className="button mt-20" type="submit">Sign In</button>
-                </Link> */}
+                </Link>*/}
                 <button className="button mt-20" type="submit" onClick={joinAlreadyCreatedRoom} >Join existing room</button>
                 <button className="button mt-20" type="submit" onClick={generateRandomRoomNo} >Create private room</button>
             </div>

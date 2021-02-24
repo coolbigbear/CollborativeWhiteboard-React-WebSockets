@@ -33,3 +33,8 @@ Changes made to any files are updated automatically if the server is running and
 
        npm start
 
+### Message structures
+---
+1. Message for joining
+2. Message for disconnecting
+3. Message for editing the whiteboard

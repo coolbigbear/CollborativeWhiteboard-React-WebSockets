@@ -20,8 +20,45 @@ const io = socketio(server);
 io.set("transports", ["websocket"]);
 
 io.on("connection", (socket) => {
+  console.log("we have a new connection");
 
-  socket.on("join", (data) => {
+  socket.on("join", ({ name, room }) => {
+    console.out(name);
+  });
+
+  socket.on("message", (data) => {
+
+    function handleNote(noteData) {
+      const action = noteData.action;
+      if (action === 'create') {
+        // create note
+      }
+      else if (action == 'move') {
+        // move note
+      } else if (action == 'delete') {
+        // delete note
+      } else {
+        // ..
+      }
+
+
+    }
+
+    switch (data.type)     {
+      case 'note':
+        handleNote(data);
+        break;
+      case 'text':
+        //..
+        break;
+      case 'image':
+        //..
+        break;
+      case 'draw':
+        //..
+      default:
+        //..
+    }
 
   });
 
