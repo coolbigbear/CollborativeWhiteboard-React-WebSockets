@@ -6,7 +6,7 @@
         if (action === 'create') {
           drawings.push(drawData);
         } else if (action == 'delete') {
-          // erase
+          delete drawings[drawData.id];
         } else {
           // ..
         }

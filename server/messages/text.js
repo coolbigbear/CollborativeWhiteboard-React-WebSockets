@@ -11,7 +11,7 @@ function handleText(textData) {
     } else if (action == 'edit') {
       // edit text
     } else if (action == 'delete') {
-      // delete text
+      delete texts[textData.id];
     } else {
       // ..
     }

@@ -11,7 +11,7 @@ function handleNote(noteData) {
     } else if (action == 'edit') {
       // edit note
     } else if (action == 'delete') {
-      // delete note
+        delete notes[noteData.id];
     } else {
       // ..
     }

@@ -9,7 +9,7 @@ function handleImage(imageData) {
     else if (action == 'move') {
       // move image
     } else if (action == 'delete') {
-      // delete image
+      delete images[imageData.id];
     } else {
       // ..
     }
