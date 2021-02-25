@@ -43,21 +43,21 @@ Changes made to any files are updated automatically if the server is running and
 ### Message for editing a whiteboard item
 
 1. Note
-       Create
-       Move
-       Edit
+       Create,
+       Move,
+       Edit,
        Delete
 2. Text
-       Create
-       Move
-       Edit
+       Create,
+       Move,
+       Edit,
        Delete
 3. Image
-       Create
-       Move
+       Create,
+       Move,
        Delete
 4. Draw
-       Create (Draw)
+       Create (Draw),
        Delete (Erase)
 
 
