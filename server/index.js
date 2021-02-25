@@ -35,8 +35,56 @@ io.on("connection", (socket) => {
       }
       else if (action == 'move') {
         // move note
+      } else if (action == 'edit') {
+        // edit note
       } else if (action == 'delete') {
         // delete note
+      } else {
+        // ..
+      }
+
+    }
+
+    function handleText(textData) {
+      const action = textData.action;
+      if (action === 'create') {
+        // create text
+      }
+      else if (action == 'move') {
+        // move text
+      } else if (action == 'edit') {
+        // delete text
+      } else if (action == 'delete') {
+        // delete text
+      } else {
+        // ..
+      }
+
+
+    }
+
+    function handleImage(imageData) {
+      const action = imageData.action;
+      if (action === 'create') {
+        // create image
+      }
+      else if (action == 'move') {
+        // move image
+      } else if (action == 'delete') {
+        // delete image
+      } else {
+        // ..
+      }
+
+
+    }
+
+    function draw(drawData) {
+      const action = drawData.action;
+      if (action === 'create') {
+        // draw
+      } else if (action == 'delete') {
+        // erase
       } else {
         // ..
       }
@@ -49,13 +97,13 @@ io.on("connection", (socket) => {
         handleNote(data);
         break;
       case 'text':
-        //..
+        handleText();
         break;
       case 'image':
-        //..
+        handleImage();
         break;
       case 'draw':
-        //..
+        draw();
       default:
         //..
     }
