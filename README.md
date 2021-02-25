@@ -33,8 +33,34 @@ Changes made to any files are updated automatically if the server is running and
 
        npm start
 
-### Message structures
----
+## Message structures
+### Types of message
+
 1. Message for joining
 2. Message for disconnecting
 3. Message for editing the whiteboard
+
+### Message for editing a whiteboard item
+
+1. Note:
+       Create,
+       Move,
+       Edit,
+       Delete
+2. Text:
+       Create,
+       Move,
+       Edit,
+       Delete
+3. Image:
+       Create,
+       Move,
+       Delete
+4. Draw:
+       Create (Draw),
+       Delete (Erase)
+
+
+
+
+
