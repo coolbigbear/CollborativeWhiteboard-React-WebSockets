@@ -1,10 +1,13 @@
+const notes = [];
+
 function handleNote(noteData) {
+    noteData.id = notes.length();
     const action = noteData.action;
     if (action === 'create') {
-      // create note
+      notes.push(noteData);
     }
     else if (action == 'move') {
-      // move note
+        // move note
     } else if (action == 'edit') {
       // edit note
     } else if (action == 'delete') {
@@ -14,3 +17,5 @@ function handleNote(noteData) {
     }
 
   }
+
+  module.exports({handleNote});

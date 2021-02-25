@@ -1,13 +1,15 @@
-
+    const drawings = [];
+    
     function draw(drawData) {
+        drawData.id = drawings.length();
         const action = drawData.action;
         if (action === 'create') {
-          // draw
+          drawings.push(drawData);
         } else if (action == 'delete') {
           // erase
         } else {
           // ..
         }
-  
-  
       }
+
+      module.exports({draw});

@@ -1,7 +1,10 @@
+const images = [];
+
 function handleImage(imageData) {
+    imageData.id = images.length();
     const action = imageData.action;
     if (action === 'create') {
-      // create image
+      images.push(imageData);
     }
     else if (action == 'move') {
       // move image
@@ -10,6 +13,6 @@ function handleImage(imageData) {
     } else {
       // ..
     }
-
-
   }
+
+module.exports({handleImage});

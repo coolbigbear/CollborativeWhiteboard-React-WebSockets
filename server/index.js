@@ -20,6 +20,8 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
+// const whiteboardItems = [];
+
 // Set used transport technologies here
 io.set("transports", ["websocket"]);
 
@@ -32,23 +34,26 @@ io.on("connection", (socket) => {
 
   socket.on("message", (data) => {
 
-
-
     switch (data.type)     {
 
       case 'note':
         note.handleNote(data);
+        
         break;
+
       case 'text':
         text.handleText();
         break;
+
       case 'image':
         image.handleImage();
         break;
+
       case 'draw':
         draw.draw();
+
       default:
-        //..
+        //
     }
 
   });
