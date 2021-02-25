@@ -10,6 +10,10 @@ const {
 // const { addRoom, getRoom } = require("./room");
 const router = require("./router");
 
+const note = require('./messages/note.js');
+const text = require('./messages/text.js');
+const image = require('./messages/image.js');
+const draw = require('./messages/draw.js');
 
 const PORT = process.env.PORT || 5000;
 const app = express();
@@ -28,82 +32,21 @@ io.on("connection", (socket) => {
 
   socket.on("message", (data) => {
 
-    function handleNote(noteData) {
-      const action = noteData.action;
-      if (action === 'create') {
-        // create note
-      }
-      else if (action == 'move') {
-        // move note
-      } else if (action == 'edit') {
-        // edit note
-      } else if (action == 'delete') {
-        // delete note
-      } else {
-        // ..
-      }
 
-    }
-
-    function handleText(textData) {
-      const action = textData.action;
-      if (action === 'create') {
-        // create text
-      }
-      else if (action == 'move') {
-        // move text
-      } else if (action == 'edit') {
-        // delete text
-      } else if (action == 'delete') {
-        // delete text
-      } else {
-        // ..
-      }
-
-
-    }
-
-    function handleImage(imageData) {
-      const action = imageData.action;
-      if (action === 'create') {
-        // create image
-      }
-      else if (action == 'move') {
-        // move image
-      } else if (action == 'delete') {
-        // delete image
-      } else {
-        // ..
-      }
-
-
-    }
-
-    function draw(drawData) {
-      const action = drawData.action;
-      if (action === 'create') {
-        // draw
-      } else if (action == 'delete') {
-        // erase
-      } else {
-        // ..
-      }
-
-
-    }
 
     switch (data.type)     {
+
       case 'note':
-        handleNote(data);
+        note.handleNote(data);
         break;
       case 'text':
-        handleText();
+        text.handleText();
         break;
       case 'image':
-        handleImage();
+        image.handleImage();
         break;
       case 'draw':
-        draw();
+        draw.draw();
       default:
         //..
     }
