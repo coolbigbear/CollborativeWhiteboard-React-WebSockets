@@ -6,7 +6,7 @@ import { getMemory, clearMemory, removeElementAt } from "./Memory"
 import { addText, promptForText } from "../../messages/text"
 import { drawLine } from "../../messages/draw";
 import { getMouseState, handleMouse, movingObject, setMouseState } from "../../messages/mouse";
-import { promptForNote } from "../../messages/note";
+import { addNote, promptForNote } from "../../messages/note";
 
 
 const Canvas = () => {
@@ -94,8 +94,8 @@ const Canvas = () => {
                     drawLine(context, canvas_mouse_coordinates);
                 }
                 else if (getMouseState().match('mouse')) {
-                    movingObject(selectedObject, canvas_mouse_coordinates)
-                    drawEverything()
+                    let update = movingObject(selectedObject, canvas_mouse_coordinates)
+                    if (update) drawEverything()
                 }
                 else if (getMouseState().match('eraser')) {
                     selectedObject = handleMouse(context, start)
@@ -115,9 +115,9 @@ const Canvas = () => {
                 if (element.type === "line") {
                     drawLine(context, element.coordinates, false)
                 }
-                // if (element.type === "note") {
-                //     drawLine(context, element.coordinates, false)
-                // }
+                if (element.type === "note") {
+                    addNote(element.text, context, element.coordinates, false)
+                }
                 // if (element.type === "image") {
                 //     drawLine(context, element.coordinates, false)
                 // }

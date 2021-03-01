@@ -87,4 +87,4 @@ server.listen(PORT, () =>
   console.log(`Server has already started on port ${PORT}`)
 );
 
-module.exports = ({whiteboardItems})
+// module.exports = ({whiteboardItems})

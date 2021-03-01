@@ -11,8 +11,10 @@ export function promptForNote(context, coordinates) {
 
 export function addNote(text, context, coordinates, addToMemoryToo = true) {
     context.font = "20px Arial";
-    context.fillStyle = "red";
+    context.fillStyle = "white";
+    context.fillRect(coordinates.x, coordinates.y, NOTE_WIDTH, NOTE_HEIGHT);
     context.strokeRect(coordinates.x, coordinates.y, NOTE_WIDTH, NOTE_HEIGHT);
+    context.fillStyle = "black";
 
     let textDimensions = context.measureText(text)
     let height = textDimensions.actualBoundingBoxAscent
