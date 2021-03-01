@@ -16,13 +16,13 @@ export function getMouseState() {
 
 export function movingObject(selectedObject, mouseCoordinates) {
     if (selectedObject == null) {
-        console.log("No object under mouse")
+        // console.log("No object under mouse")
         return
     } else {
         var obj = getElementAt(selectedObject);
         obj.coordinates.x += mouseCoordinates.end.x - mouseCoordinates.start.x;
         obj.coordinates.y += mouseCoordinates.end.y - mouseCoordinates.start.y;
         replaceElementAt(selectedObject, obj)
-        console.log(getMemory())
+        // console.log(getMemory())
     }
 }

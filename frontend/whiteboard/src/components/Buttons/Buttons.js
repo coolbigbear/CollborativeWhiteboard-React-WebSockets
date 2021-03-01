@@ -57,6 +57,16 @@ export default class Buttons extends Component {
                     Note
                 </button>
                 <button
+                    id="imageButton"
+                    onClick={() => {
+                        console.log("Image button clicked")
+                        this.props.setMouseState('image')
+                        pressButton("imageButton")
+                    }}
+                    >
+                    Upload Image
+                </button>
+                <button
                     id="mouseButton"
                     onClick={() => {
                         console.log("Mouse button clicked")
@@ -65,6 +75,26 @@ export default class Buttons extends Component {
                     }}
                 >
                     Mouse
+                </button>
+                <button
+                    id="eraserButton"
+                    onClick={() => {
+                        console.log("Eraser button clicked")
+                        this.props.setMouseState('eraser')
+                        pressButton("eraserButton")
+                    }}
+                >
+                    Eraser
+                </button>
+                <button
+                    id="undoButton"
+                    onClick={() => {
+                        console.log("Undo button clicked")
+                        this.props.setMouseState('mouse')
+                        pressButton("mouseButton")
+                    }}
+                >
+                    Undo
                 </button>
             </div>
         )

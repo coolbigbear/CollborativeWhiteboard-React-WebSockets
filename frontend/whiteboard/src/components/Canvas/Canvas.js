@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 
 import "./Canvas.css";
 import Buttons from "../Buttons/Buttons";
-import { getMemory, clearMemory } from "./Memory"
+import { getMemory, clearMemory, removeElementAt } from "./Memory"
 import { addText, promptForText } from "../../messages/text"
 import { drawLine } from "../../messages/draw";
 import { getMouseState, handleMouse, movingObject, setMouseState } from "../../messages/mouse";
+import { promptForNote } from "../../messages/note";
 
 
 const Canvas = () => {
@@ -59,6 +60,10 @@ const Canvas = () => {
             else if (getMouseState().match('mouse')) {
                 selectedObject = handleMouse(context, start)
             }
+            else if (getMouseState().match('note')) {
+                promptForNote(context, start)
+                mouseDown = false;
+            }
         }
 
         function handleMouseUp(evt) {
@@ -90,7 +95,12 @@ const Canvas = () => {
                 }
                 else if (getMouseState().match('mouse')) {
                     movingObject(selectedObject, canvas_mouse_coordinates)
-                    drawEverything(context)
+                    drawEverything()
+                }
+                else if (getMouseState().match('eraser')) {
+                    selectedObject = handleMouse(context, start)
+                    removeElementAt(selectedObject);
+                    drawEverything()
                 }
             }
         }
@@ -105,6 +115,12 @@ const Canvas = () => {
                 if (element.type === "line") {
                     drawLine(context, element.coordinates, false)
                 }
+                // if (element.type === "note") {
+                //     drawLine(context, element.coordinates, false)
+                // }
+                // if (element.type === "image") {
+                //     drawLine(context, element.coordinates, false)
+                // }
             });
         } 
 

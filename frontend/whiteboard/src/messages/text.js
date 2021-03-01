@@ -25,9 +25,9 @@ export function addText(text, context, coordinates, addToMemoryToo = true) {
     }
 }
 
-
 function calculateTextWidth(context, obj) {
-    obj.width = context.measureText(obj.text).width;
-    obj.height = obj.font;
+    let dimensions = context.measureText(obj.text);
+    obj.width = dimensions.width;
+    obj.height = dimensions.actualBoundingBoxAscent
     return obj
 }
