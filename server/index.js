@@ -20,8 +20,6 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
-// const whiteboardItems = [];
-
 // Set used transport technologies here
 io.set("transports", ["websocket"]);
 
@@ -34,6 +32,9 @@ io.on("connection", (socket) => {
 
   socket.on("message", (data) => {
 
+    data.id = whiteboardItems.length();
+    whiteboardItems.push(data);
+
     switch (data.type)     {
 
       case 'note':
@@ -42,15 +43,15 @@ io.on("connection", (socket) => {
         break;
 
       case 'text':
-        text.handleText();
+        text.handleText(data);
         break;
 
       case 'image':
-        image.handleImage();
+        image.handleImage(data);
         break;
 
       case 'draw':
-        draw.draw();
+        draw.draw(data);
 
       default:
         //
@@ -76,3 +77,5 @@ app.use(router);
 server.listen(PORT, () =>
   console.log(`Server has already started on port ${PORT}`)
 );
+
+module.exports = ({whiteboardItems})
