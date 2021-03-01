@@ -1,18 +1,19 @@
 const images = [];
 
 function handleImage(imageData) {
-    imageData.id = images.length();
     const action = imageData.action;
     if (action === 'create') {
+      imageData.id = images.length();
       images.push(imageData);
     }
     else if (action == 'move') {
-      // move image
+      images[imageData.id].xPos = imageData.xPos;
+      images[imageData.id].yPos = imageData.yPos;
     } else if (action == 'delete') {
-      delete images[imageData.id];
+      images[imageData.id].active = false;
     } else {
       // ..
     }
   }
 
-module.exports = ({handleImage});
+module.exports = ({handleImage, images});
