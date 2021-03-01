@@ -1,17 +1,18 @@
 const texts = []
 
 function handleText(textData) {
-    textData.id = texts.length();
     const action = textData.action;
     if (action === 'create') {
+      textData.id = texts.length();
       texts.push(textData);
     }
     else if (action == 'move') {
-      // move text
+      texts[textData.id].xPos = textData.xPos;
+      texts[textData.id].yPos = textData.yPos;
     } else if (action == 'edit') {
       // edit text
     } else if (action == 'delete') {
-      delete texts[textData.id];
+      texts[textData.id].active = false;
     } else {
       // ..
     }

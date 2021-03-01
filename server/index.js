@@ -28,6 +28,9 @@ io.on("connection", (socket) => {
 
   socket.on("join", ({ name, room }) => {
     console.out(name);
+
+    //send all notes, texts, images, drawings to the new user
+
   });
 
   socket.on("message", (data) => {
@@ -39,19 +42,23 @@ io.on("connection", (socket) => {
 
       case 'note':
         note.handleNote(data);
-        
+        // update every users notes
         break;
 
       case 'text':
         text.handleText(data);
+        // update every users texts
         break;
 
       case 'image':
         image.handleImage(data);
+        // update every users images
         break;
 
       case 'draw':
         draw.draw(data);
+        // update every users drawings
+        break;
 
       default:
         //
