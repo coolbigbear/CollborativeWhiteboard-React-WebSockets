@@ -8,7 +8,7 @@ export function addToMemory(obj) {
 export function checkIfMouseOnObject(coordinates) {
 
     for (let i = 0; i < memory.length; i++) {
-        if (coordinates.x >= memory[i].x && coordinates.x <= memory[i].x + memory[i].width && coordinates.y >= memory[i].y - memory[i].height && coordinates.y <= memory[i].y) {
+        if (coordinates.x >= memory[i].coordinates.x && coordinates.x <= memory[i].coordinates.x + memory[i].width && coordinates.y >= memory[i].coordinates.y - memory[i].height && coordinates.y <= memory[i].coordinates.y) {
             return i;
         }
         

@@ -4,6 +4,9 @@ import "./Buttons.css"
 
 export default class Buttons extends Component {
     
+    componentDidMount() {
+        document.getElementById("mouseButton").className = "pressedButton"
+    }
 
     render() {
 
@@ -14,7 +17,7 @@ export default class Buttons extends Component {
             });
             document.getElementById(buttonID).className = "pressedButton"
         }
-
+        
         return (
             <div id="buttonGroup">
                 <button

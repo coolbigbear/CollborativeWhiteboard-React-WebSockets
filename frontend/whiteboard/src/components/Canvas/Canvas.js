@@ -1,18 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import Buttons from "../Buttons/Buttons";
-import { getElementAt, replaceElementAt, addToMemory, getMemory, checkIfMouseOnObject, clearMemory } from "./Memory"
 import "./Canvas.css";
+import Buttons from "../Buttons/Buttons";
+import { getMemory, clearMemory } from "./Memory"
+import { addText, promptForText } from "../../messages/text"
+import { drawLine } from "../../messages/draw";
+import { getMouseState, handleMouse, movingObject, setMouseState } from "../../messages/mouse";
 
 
 const Canvas = () => {
     const canvasRef = useRef(null);
     const [context, setContext] = useState(null);
     const [color, setColor] = useState('#00000');
-    let mouseState = 'mouse'
-    let selectedObject = null
-
+    
     useEffect(() => {
+        let selectedObject = null
         let mouseDown = false;
         let start = { x: 0, y: 0 };
         let end = { x: 0, y: 0 };
@@ -50,12 +52,12 @@ const Canvas = () => {
                 y: evt.clientY - canvasOffsetTop,
             };
 
-            if (mouseState.match('text')) {
-                addText(context, start)
+            if (getMouseState().match('text')) {
+                promptForText(context, start)
                 mouseDown = false;
             }
-            else if (mouseState.match('mouse')) {
-                handleMouse(context, start)
+            else if (getMouseState().match('mouse')) {
+                selectedObject = handleMouse(context, start)
             }
         }
 
@@ -82,26 +84,29 @@ const Canvas = () => {
                 };
 
                 // Draw our path
-                console.log(mouseState)
-                if (mouseState.match('draw')) {
+                console.log(getMouseState())
+                if (getMouseState().match('draw')) {
                     drawLine(context, canvas_mouse_coordinates);
                 }
-                else if (mouseState.match('mouse')) {
-                    if (selectedObject == null) {
-                        console.log("No object under mouse")
-                        return
-                    } else {
-
-                        var obj = getElementAt(selectedObject);
-                        obj.x += end.x - start.x;
-                        obj.y += end.y - start.y;
-                        replaceElementAt(selectedObject, obj)
-                        console.log(getMemory())
-                        drawEverything(context)
-                    }
+                else if (getMouseState().match('mouse')) {
+                    movingObject(selectedObject, canvas_mouse_coordinates)
+                    drawEverything(context)
                 }
             }
         }
+
+        function drawEverything() {
+            let array = getMemory()
+            clearCanvas(false)
+            array.forEach(element => {
+                if (element.type === "text") {
+                    addText(element.text, context, element.coordinates, false)
+                }
+                if (element.type === "line") {
+                    drawLine(context, element.coordinates, false)
+                }
+            });
+        } 
 
         return function cleanup() {
             if (canvasRef.current) {
@@ -111,20 +116,8 @@ const Canvas = () => {
             }
         };
 
-    }, [context, color, mouseState]);
+    }, [context, color, clearCanvas]);
 
-    function drawEverything() {
-        let array = getMemory()
-        clearCanvas(false)
-        array.forEach(element => {
-            if (element.type === "text") {
-                context.fillText(element.text, element.x, element.y);
-            }
-            if (element.type === "line") {
-                drawLine(context, element.coordinates, false)
-            }
-        });
-    } 
 
     function clearCanvas(clearMemoryToo = true) {
         if (context) {
@@ -138,59 +131,6 @@ const Canvas = () => {
             );
 
         }
-    }
-
-    function setMouseState(state) {
-        mouseState = state;
-    }
-
-    function drawLine(context, coordinates, addToMemoryToo = true) {
-        context.beginPath();
-        context.moveTo(coordinates.start.x, coordinates.start.y);
-        context.lineTo(coordinates.end.x, coordinates.end.y);
-        context.strokeStyle = coordinates.color.hex;
-        context.lineWidth = 3;
-        context.stroke();
-        context.closePath();
-
-        if (addToMemoryToo) {
-            let obj = {
-                type: "line",
-                lineWidth: 3,
-                selected: false,
-                coordinates: coordinates
-            }
-            addToMemory(obj)
-        }
-    }
-
-    function addText(context, coordinates) {
-        let text = prompt("Please type in your text:")
-        if (text === null) return;
-        console.log(text)
-        context.font = "100px Arial";
-        context.fillStyle = "red";
-        context.fillText(text, coordinates.x, coordinates.y);
-        let obj = {
-            type: "text",
-            text: text,
-            font: 100,
-            x: coordinates.x,
-            y: coordinates.y,
-            selected: false
-        }
-        obj = calculateTextWidth(context, obj)
-        addToMemory(obj)
-    }
-
-    function calculateTextWidth(context, obj) {
-        obj.width = context.measureText(obj.text).width;
-        obj.height = obj.font;
-        return obj
-    }
-
-    function handleMouse(context, coordinates) {
-        selectedObject = checkIfMouseOnObject(coordinates)
     }
 
     return (
