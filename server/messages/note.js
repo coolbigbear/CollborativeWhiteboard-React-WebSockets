@@ -19,4 +19,4 @@ function handleNote(noteData) {
 
   }
 
-  module.exports = ({handleNote});
+  module.exports = ({handleNote, notes});

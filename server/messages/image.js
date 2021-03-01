@@ -16,4 +16,4 @@ function handleImage(imageData) {
     }
   }
 
-module.exports = ({handleImage});
+module.exports = ({handleImage, images});

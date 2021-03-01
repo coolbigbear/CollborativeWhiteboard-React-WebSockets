@@ -29,35 +29,37 @@ io.on("connection", (socket) => {
   socket.on("join", ({ name, room }) => {
     console.out(name);
 
-    //send all notes, texts, images, drawings to the new user
+    const activeNotes = note.notes.filter(/* take the active texts */);
+    const activeTexts = text.texts.filter(/* take the active texts */);
+    const activeImages = image.images.filter(/* take the active texts */);
+    const activeDrawings = draw.drawings.filter(/* take the active texts */);
+
+    //send all active notes, texts, images, drawings to the new user
 
   });
 
   socket.on("message", (data) => {
 
-    data.id = whiteboardItems.length();
-    whiteboardItems.push(data);
-
     switch (data.type)     {
 
       case 'note':
         note.handleNote(data);
-        // update every users notes
+        const activeNotes = note.notes.filter(/* take the active texts */);
         break;
 
       case 'text':
         text.handleText(data);
-        // update every users texts
+        const activeTexts = text.texts.filter(/* take the active texts */);
         break;
 
       case 'image':
         image.handleImage(data);
-        // update every users images
+        const activeImages = image.images.filter(/* take the active texts */);
         break;
 
       case 'draw':
         draw.draw(data);
-        // update every users drawings
+        const activeDrawings = draw.drawings.filter(/* take the active texts */);
         break;
 
       default:
