@@ -13,7 +13,6 @@ export function checkIfMouseOnObject(coordinates) {
                 return i;
             }
         } else {
-            console.log("NO")
             if (coordinates.x >= memory[i].coordinates.x && coordinates.x <= memory[i].coordinates.x + memory[i].width && coordinates.y >= memory[i].coordinates.y - memory[i].height && coordinates.y <= memory[i].coordinates.y) {
                 return i;
             }
