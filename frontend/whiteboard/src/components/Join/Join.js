@@ -6,22 +6,19 @@ import './Join.css';
 const Join = () => {
 
     const [name, setName] = useState('');
-    const [room, setRoom] = useState('');
+    const [room, setRoom] = useState(123456);
     const history = useHistory();
 
 
-    function generateRandomRoomNo() {
-        setRoom(Math.floor(100000 + Math.random() * 900000))
-        console.log(room)
-        console.log("AAHAHAHA")
-        // history.push(`/room?room=${room}&name=${name}`)
+    async function generateRandomRoomNo() {
+        let roomNo = Math.floor(100000 + Math.random() * 900000)
+        console.log("Generating Random room no")
+        history.push(`/room?room=${roomNo}&name=${name}`)
     }
 
     function joinAlreadyCreatedRoom() {
-        history.push(`/room?room=${room}&name=${name}`)
-        setRoom(room);
-        setName(name);
         console.log("joining an existing room");
+        history.push(`/room?room=${room}&name=${name}`)
     }
 
     return (

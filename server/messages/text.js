@@ -17,4 +17,4 @@ function handleText(textData) {
     }
   }
 
-  module.exports({handleText});
+  module.exports = ({handleText});

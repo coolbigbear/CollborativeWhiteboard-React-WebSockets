@@ -12,4 +12,4 @@
         }
       }
 
-      module.exports({draw});
+      module.exports = ({draw});
