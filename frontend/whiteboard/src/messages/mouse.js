@@ -16,7 +16,7 @@ export function getMouseState() {
 
 export function movingObject(selectedObject, mouseCoordinates) {
     if (selectedObject == null) {
-        console.log("No object under mouse")
+        // console.log("No object under mouse")
         return
     } else {
         var obj = getElementAt(selectedObject);
