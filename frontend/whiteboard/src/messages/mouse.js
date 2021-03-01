@@ -20,6 +20,7 @@ export function movingObject(selectedObject, mouseCoordinates) {
         return
     } else {
         var obj = getElementAt(selectedObject);
+        console.log("Mouse over:", obj)
         obj.coordinates.x += mouseCoordinates.end.x - mouseCoordinates.start.x;
         obj.coordinates.y += mouseCoordinates.end.y - mouseCoordinates.start.y;
         replaceElementAt(selectedObject, obj)

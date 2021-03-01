@@ -13,7 +13,8 @@ export function drawLine(context, coordinates, addToMemoryToo = true) {
     if (addToMemoryToo) {
         let obj = {
             type: "line",
-            lineWidth: 3,
+            width: 10,
+            height: 10,
             selected: false,
             coordinates: coordinates
         }
