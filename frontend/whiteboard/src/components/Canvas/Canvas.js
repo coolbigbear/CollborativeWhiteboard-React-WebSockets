@@ -6,6 +6,7 @@ import { getMemory, clearMemory, removeElementAt } from "./Memory"
 import { addText, promptForText } from "../../messages/text"
 import { drawLine } from "../../messages/draw";
 import { getMouseState, handleMouse, movingObject, setMouseState } from "../../messages/mouse";
+import { promptForNote } from "../../messages/note";
 
 
 const Canvas = () => {
@@ -58,6 +59,10 @@ const Canvas = () => {
             }
             else if (getMouseState().match('mouse')) {
                 selectedObject = handleMouse(context, start)
+            }
+            else if (getMouseState().match('note')) {
+                promptForNote(context, start)
+                mouseDown = false;
             }
         }
 
