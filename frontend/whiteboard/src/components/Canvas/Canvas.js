@@ -1,21 +1,37 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
 import "./Canvas.css";
-import Buttons from "../Buttons/Buttons";
 import { getMemory, clearMemory, removeElementAt } from "./Memory"
 import { addText, promptForText } from "../../messages/text"
 import { drawLine } from "../../messages/draw";
 import { getMouseState, handleMouse, movingObject, setMouseState } from "../../messages/mouse";
 import { addNote, promptForNote } from "../../messages/note";
 
+import Buttons from "../Buttons/Buttons";
+import EditPanel from "../EditPanel/EditPanel";
+
 
 const Canvas = () => {
     const canvasRef = useRef(null);
     const [context, setContext] = useState(null);
     const [color, setColor] = useState('#00000');
+    let selectedObject = useRef(null)
+
+    const clearCanvas = useCallback((clearMemoryToo = true) => {
+        if (context) {
+            // Below is needed
+            if (clearMemoryToo) clearMemory()
+            context.clearRect(
+                0,
+                0,
+                canvasRef.current.width,
+                canvasRef.current.height
+            );
+
+        }
+    }, [context])
     
     useEffect(() => {
-        let selectedObject = null
         let mouseDown = false;
         let start = { x: 0, y: 0 };
         let end = { x: 0, y: 0 };
@@ -58,7 +74,7 @@ const Canvas = () => {
                 mouseDown = false;
             }
             else if (getMouseState().match('mouse')) {
-                selectedObject = handleMouse(context, start)
+                selectedObject.current = handleMouse(context, start)
             }
             else if (getMouseState().match('note')) {
                 promptForNote(context, start)
@@ -94,12 +110,12 @@ const Canvas = () => {
                     drawLine(context, canvas_mouse_coordinates);
                 }
                 else if (getMouseState().match('mouse')) {
-                    let update = movingObject(selectedObject, canvas_mouse_coordinates)
+                    let update = movingObject(selectedObject.current, canvas_mouse_coordinates)
                     if (update) drawEverything()
                 }
                 else if (getMouseState().match('eraser')) {
-                    selectedObject = handleMouse(context, start)
-                    removeElementAt(selectedObject);
+                    selectedObject.current = handleMouse(context, start)
+                    removeElementAt(selectedObject.current);
                     drawEverything()
                 }
             }
@@ -134,30 +150,20 @@ const Canvas = () => {
 
     }, [context, color, clearCanvas]);
 
-
-    function clearCanvas(clearMemoryToo = true) {
-        if (context) {
-            // Below is needed
-            if (clearMemoryToo) clearMemory()
-            context.clearRect(
-                0,
-                0,
-                canvasRef.current.width,
-                canvasRef.current.height
-            );
-
-        }
-    }
-
     return (
-        <div>
+        <div id="wrapper">
+            <div id="left">
             <canvas
                 id="canvas"
                 ref={canvasRef}
                 width="1500"
                 height="800"
             ></canvas>
-            <Buttons clearCanvas={clearCanvas} setMouseState={setMouseState}></Buttons>
+                <Buttons clearCanvas={clearCanvas} setMouseState={setMouseState}></Buttons>
+            </div>
+            <div id="right">
+                <EditPanel selectedObject={selectedObject.current}></EditPanel>
+            </div>
         </div>
     );
 };
