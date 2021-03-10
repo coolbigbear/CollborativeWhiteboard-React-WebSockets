@@ -1,23 +1,66 @@
-import {addToMemory} from '../components/Canvas/Memory'
+import {addToMemory, getElementAt, getLengthOfMemory, replaceElementAt} from '../components/Canvas/Memory'
 
 export function promptForText(context, coordinates) {
     let text = prompt("Please type in your text:")
     if (text === null) return;
     console.log(text)
-    addText(text, context, coordinates)    
+    let temp = {
+        text: text,
+        coordinates: coordinates
+    }
+    addText(context, temp)    
 }
 
-export function addText(text, context, coordinates, addToMemoryToo = true) {
-    context.font = "100px Arial";
-    context.fillStyle = "red";
-    context.fillText(text, coordinates.x, coordinates.y);
+export function changeTextValues(id, key, value) {
+    let obj = getElementAt(id)
+    let objOld = obj
+    obj[key] = value
+    replaceElementAt(id, obj, objOld)
+}
+
+export function changeTextPosition(id, key, value) {
+    let obj = getElementAt(id)
+    let objOld = obj
+    obj["coordinates"][key] = value
+    replaceElementAt(id, obj, objOld)
+}
+
+export function addText(context, element, addToMemoryToo = true) {
+
+    let FONT_COLOR = "#000000"
+    let FONT_SIZE = "80"
+
+    if (element.hasOwnProperty('fontColor')) {
+        FONT_COLOR = element.fontColor
+    } else {
+        FONT_COLOR = "#000000"
+    }
+
+    if (element.hasOwnProperty('fontSize')) {
+        FONT_SIZE = element.fontSize
+    } else {
+        FONT_SIZE = "80"
+    }
+
+    context.font = `${FONT_SIZE}px Arial`;
+    context.fillStyle = FONT_COLOR;
+    context.fillText(element.text, element.coordinates.x, element.coordinates.y);
+
+    let obj = calculateTextWidth(context, element)
+    if (element !== obj) {
+        // Recalc width and height of text
+        replaceElementAt(element.id, obj, element)
+
+    }
 
     if (addToMemoryToo) {
         let obj = {
+            id: getLengthOfMemory() + 1,
             type: "text",
-            text: text,
-            font: 100,
-            coordinates: coordinates,
+            text: element.text,
+            fontSize: FONT_SIZE,
+            fontColor: FONT_COLOR,
+            coordinates: element.coordinates,
             selected: false
         }
         obj = calculateTextWidth(context, obj)

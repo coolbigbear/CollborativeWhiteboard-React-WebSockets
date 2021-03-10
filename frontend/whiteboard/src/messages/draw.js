@@ -1,4 +1,4 @@
-import { addToMemory } from "../components/Canvas/Memory";
+import { addToMemory, getLengthOfMemory } from "../components/Canvas/Memory";
 
 
 export function drawLine(context, coordinates, addToMemoryToo = true) {
@@ -12,6 +12,7 @@ export function drawLine(context, coordinates, addToMemoryToo = true) {
 
     if (addToMemoryToo) {
         let obj = {
+            id: getLengthOfMemory() + 1,
             type: "line",
             width: 10,
             height: 10,

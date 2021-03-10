@@ -19,10 +19,11 @@ export function movingObject(selectedObject, mouseCoordinates) {
         // console.log("No object under mouse")
         return false
     } else {
-        var obj = getElementAt(selectedObject);
+        let obj = getElementAt(selectedObject);
+        let objOld = obj
         obj.coordinates.x += mouseCoordinates.end.x - mouseCoordinates.start.x;
         obj.coordinates.y += mouseCoordinates.end.y - mouseCoordinates.start.y;
-        replaceElementAt(selectedObject, obj)
+        replaceElementAt(selectedObject, obj, objOld)
         // console.log(getMemory())
         return true
     }
