@@ -8,8 +8,10 @@ function App() {
   return (
     <Router>
       <Route path='/' exact component={Join} />
-      <Route path='/room/:id' component={Room} />
+      <Route path='/room' component={Room} /> 
     </Router>
   )}
+
+//<Route path='/room/:id' component={Room} /> 
 
 export default App;
