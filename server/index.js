@@ -1,19 +1,18 @@
 const express = require("express");
 const socketio = require("socket.io");
 const http = require("http");
-const {
-  addUser,
-  removeUser,
-  getUser,
-  getUsersInRoom
-} = require("./users");
-// const { addRoom, getRoom } = require("./room");
-const router = require("./router");
 
+const router = require("./router");
 const note = require('./messages/note.js');
 const text = require('./messages/text.js');
 const image = require('./messages/image.js');
 const draw = require('./messages/draw.js');
+const { addUser, getUser, getUsersInRoom, getAdminInRoom, removeUser } = require("./users");
+const { getMemory, clearMemory, checkIfMouseOnObject, getElementAt } = require("./messages/messagesManager");
+const { handleNote } = require("./messages/note.js");
+const { handleMouse } = require("./messages/mouse");
+const { handleText } = require("./messages/text.js");
+const { converJSONToBuffer, convertBufferToJSON } = require("./util/bufferUtils");
 
 const PORT = process.env.PORT || 5000;
 const app = express();
@@ -24,67 +23,125 @@ const io = socketio(server);
 io.set("transports", ["websocket"]);
 
 io.on("connection", (socket) => {
-  console.log("we have a new connection");
 
-  socket.on("join", ({ name, room }) => {
-    console.out(name);
+	console.log("connection")
 
-    const activeNotes = note.notes.filter(/* take the active texts */);
-    const activeTexts = text.texts.filter(/* take the active texts */);
-    const activeImages = image.images.filter(/* take the active texts */);
-    const activeDrawings = draw.drawings.filter(/* take the active texts */);
+	socket.on("poke", () => {
+		console.log("youve been poked")
+	});
 
-    //send all active notes, texts, images, drawings to the new user
+	socket.on("join", ({ name, room }, callback) => {
 
-  });
+		console.log("User", name, " joining");
 
-  socket.on("message", (data) => {
+		const { error, approval, user } = addUser(socket.id, name, room)
 
-    switch (data.type)     {
+		if (error) {
+			return callback(error);
+		}
 
-      case 'note':
-        note.handleNote(data);
-        const activeNotes = note.notes.filter(/* take the active texts */);
-        break;
+		if (approval) {
+			let admin = getAdminInRoom(room)
+			let adminID = admin.id
+			console.log(adminID)
+			io.to(adminID).emit("userApprove", user)
+			let error = "Waiting for host to approve"
+			return callback(error)
+		} else {
+			// Send back current whiteboard data
+			let memory = getMemory()
+			return callback()
+		}
+	});
 
-      case 'text':
-        text.handleText(data);
-        const activeTexts = text.texts.filter(/* take the active texts */);
-        break;
+	socket.on("message", (data, action, callback = (() => { })) => {
 
-      case 'image':
-        image.handleImage(data);
-        const activeImages = image.images.filter(/* take the active texts */);
-        break;
+		// console.log(data, action, callback)
+		// console.log(action)
+		data = convertBufferToJSON(data)
 
-      case 'draw':
-        draw.draw(data);
-        const activeDrawings = draw.drawings.filter(/* take the active texts */);
-        break;
+		switch (data.type) {
 
-      default:
-        //
-    }
+			case 'note':
+				// console.log("Handling note")
+				handleNote(data, action);
+				socket.broadcast.emit("redraw")
+				callback()
+				// const activeNotes = note.notes.filter(/* take the active texts */);
+				break;
 
-  });
+			case 'text':
+				// console.log("handling text")
+				handleText(data, action);
+				socket.broadcast.emit("redraw")
+				callback()
+				// const activeTexts = text.texts.filter(/* take the active texts */);
+				break;
 
-  socket.on("canvas_mouse_co-ordinates", (coordinates) => {
-    console.log("Received mouse coordinates: ",coordinates)
-  });
+			case 'image':
+				handleImage(data, action);
+				// const activeImages = image.images.filter(/* take the active texts */);
+				break;
 
-  socket.on("canvas_clear", () => {
-    console.log("Received canvas clear command")
-  });
+			case 'draw':
+				draw(data, action);
+				// const activeDrawings = draw.drawings.filter(/* take the active texts */);
+				break;
 
-  socket.on("disconnect", () => {
-    console.log("we have lost conenction!!");
-  });
+			case 'mouse':
+				// console.log("handling mouse", data, action, callback)
+				handleMouse(data, action, callback)
+				socket.broadcast.emit("redraw")
+				// const activeDrawings = draw.drawings.filter(/* take the active texts */);
+				break;
+
+			case 'canvas':
+				// console.log("Canvas called")
+				let mem = getMemory()
+				callback(converJSONToBuffer(mem))
+				// const activeDrawings = draw.drawings.filter(/* take the active texts */);
+				break;
+			
+			case 'user':
+				console.log("user called", data, action)
+				let userID = getUser(data.user.id).id
+				if (action == "approved") {
+					console.log("Approving user")
+					io.to(userID).emit("approved", data.user)
+				}
+				else if (action == "denied") {
+					console.log("Denying user")
+					io.to(userID).emit("denied", data.user)
+					removeUser(userID)
+				}
+				// const activeDrawings = draw.drawings.filter(/* take the active texts */);
+				break;
+
+			default:
+			//
+		}
+
+	});
+
+	socket.on("sendClearCanvas", (clearMemoryToo) => {
+		console.log("Received clear canvas, broadcasting back")
+		socket.broadcast.emit("clearCanvas", clearMemoryToo)
+	});
+
+	socket.on("clearMemory", () => {
+		console.log("Clearing memory")
+		clearMemory()
+	})
+
+	socket.on("disconnect", () => {
+		console.log("we have lost conenction!!");
+	});
 });
 
 app.use(router);
 
 server.listen(PORT, () =>
-  console.log(`Server has already started on port ${PORT}`)
+	console.log(`Server has already started on port ${PORT}`)
 );
 
 // module.exports = ({whiteboardItems})

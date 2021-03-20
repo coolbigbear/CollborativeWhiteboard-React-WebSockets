@@ -22,7 +22,10 @@ export default class Buttons extends Component {
             <div id="buttonGroup">
                 <button
                     id="clearButton"
-                    onClick={() => this.props.clearCanvas()}
+                    onClick={() => {
+                        this.props.sendClearCanvas(true)
+                        console.log("Clear button clicked")
+                    }}
                 >
                     Clear
                 </button>

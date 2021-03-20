@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
+import { useHistory } from 'react-router-dom'
+
 import queryString from 'query-string'
-
-import Canvas from '../Canvas/Canvas.js'
-
+import Canvas from '../Canvas/Canvas'
 import socket from '../socket'
 
 const Room = ({ location }) => {
@@ -10,37 +10,31 @@ const Room = ({ location }) => {
     const [name, setName] = useState('');
     const [room, setRoom] = useState('');
     const [users, setUsers] = useState([]);
+    let history = useHistory()
+
 
     useEffect(() => {
         const { name, room } = queryString.parse(location.search);
 
-        console.log("yes");
-
         setName(name);
         setRoom(room);
 
-        console.log(name);
+        console.log("wow")
+        console.log(socket)
 
-        socket.emit('join', { name, room }, () => {
-        });
+        
 
-        //socket.emit('message', (data), () => {
-
-        //});
-
-        socket.on('roomData', ({ users }) => {
-            setUsers(users);
-        });
+        socket.on('poke');
 
         return () => {
-            //socket.emit('disconnect');
-            //socket.off();
+            socket.emit('disconnect');
+            socket.off();
         }
-    }, ['localhost:5000', location.search]);
+    }, [location.search]);
 
     return (
-        <div>
-            <Canvas></Canvas>
+        <div >
+            <Canvas name={name}></Canvas>
         </div>
     )
 }

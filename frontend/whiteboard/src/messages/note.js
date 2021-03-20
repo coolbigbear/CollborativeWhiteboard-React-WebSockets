@@ -1,4 +1,6 @@
 import { addToMemory, getElementAt, getLengthOfMemory, replaceElementAt } from '../components/Canvas/Memory'
+import socket from '../components/socket';
+import { convertJSONToBuffer } from '../util/bufferUtils';
 
 export function promptForNote(context, coordinates) {
     let text = prompt("Please type in the text of your note:")
@@ -10,18 +12,18 @@ export function promptForNote(context, coordinates) {
     addNote(context, element)
 }
 
-export function changeNoteValues(id, key, value) {
-    let obj = getElementAt(id)
-    let objOld = obj
+export function changeNoteValues(obj, key, value) {
     obj[key] = value
-    replaceElementAt(id, obj, objOld)
+    socket.emit("message", convertJSONToBuffer(obj), "edit")
 }
 
-export function changeNotePosition(id, key, value) {
-    let obj = getElementAt(id)
-    let objOld = obj
+export function changeNotePosition(obj, key, value) {
     obj["coordinates"][key] = value
-    replaceElementAt(id, obj, objOld)
+    socket.emit("message", convertJSONToBuffer(obj), "edit")
+}
+
+export function deleteNote(obj) {
+    socket.emit("message", obj, "delete")
 }
 
 export function addNote(context, element, addToMemoryToo = true) {

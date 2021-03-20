@@ -1,4 +1,6 @@
-import {addToMemory, getElementAt, getLengthOfMemory, replaceElementAt} from '../components/Canvas/Memory'
+import {addToMemory, getLengthOfMemory } from '../components/Canvas/Memory'
+import socket from '../components/socket';
+import { convertJSONToBuffer } from '../util/bufferUtils';
 
 export function promptForText(context, coordinates) {
     let text = prompt("Please type in your text:")
@@ -11,18 +13,14 @@ export function promptForText(context, coordinates) {
     addText(context, temp)    
 }
 
-export function changeTextValues(id, key, value) {
-    let obj = getElementAt(id)
-    let objOld = obj
+export function changeTextValues(obj, key, value) {
     obj[key] = value
-    replaceElementAt(id, obj, objOld)
+    socket.emit("message", convertJSONToBuffer(obj), "edit")
 }
 
-export function changeTextPosition(id, key, value) {
-    let obj = getElementAt(id)
-    let objOld = obj
+export function changeTextPosition(obj, key, value) {
     obj["coordinates"][key] = value
-    replaceElementAt(id, obj, objOld)
+    socket.emit("message", convertJSONToBuffer(obj), "edit")
 }
 
 export function addText(context, element, addToMemoryToo = true) {
@@ -39,21 +37,27 @@ export function addText(context, element, addToMemoryToo = true) {
     if (element.hasOwnProperty('fontSize')) {
         FONT_SIZE = element.fontSize
     } else {
-        FONT_SIZE = "80"
+        FONT_SIZE = 80
     }
 
     context.font = `${FONT_SIZE}px Arial`;
     context.fillStyle = FONT_COLOR;
     context.fillText(element.text, element.coordinates.x, element.coordinates.y);
 
-    let obj = calculateTextWidth(context, element)
-    if (element !== obj) {
+    // console.log("element", element)
+    let width =  calculateTextWidth(context, element).width
+    let height = calculateTextWidth(context, element).actualBoundingBoxAscent
+    if (element.width !== width || element.height !== height) {
         // Recalc width and height of text
-        replaceElementAt(element.id, obj, element)
+        console.log("resizing text")
+        element.height = height
+        element.width = width
+        socket.emit("message", convertJSONToBuffer(element), "edit")
 
     }
 
     if (addToMemoryToo) {
+        console.log("adding text to memory")
         let obj = {
             id: getLengthOfMemory() + 1,
             type: "text",
@@ -63,14 +67,14 @@ export function addText(context, element, addToMemoryToo = true) {
             coordinates: element.coordinates,
             selected: false
         }
-        obj = calculateTextWidth(context, obj)
+        let dimensions = calculateTextWidth(context, obj)
+        obj.width = dimensions.width
+        obj.height = dimensions.actualBoundingBoxAscent
         addToMemory(obj)
     }
 }
 
 function calculateTextWidth(context, obj) {
     let dimensions = context.measureText(obj.text);
-    obj.width = dimensions.width;
-    obj.height = dimensions.actualBoundingBoxAscent
-    return obj
+    return dimensions
 }

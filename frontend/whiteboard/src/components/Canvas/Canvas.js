@@ -9,20 +9,49 @@ import { addNote, promptForNote } from "../../messages/note";
 
 import Buttons from "../Buttons/Buttons";
 import EditPanel from "../EditPanel/EditPanel";
+import socket from "../socket";
+import { convertJSONToBuffer, convertBufferToJSON } from "../../util/bufferUtils";
 
+socket.on("userApprove", (user) => {
+    console.log("user approve called");
+    let answer = window.confirm(`Approve user: ${user.name}`);
+    let temp = convertJSONToBuffer({ type: "user", user: user })
+    console.log(answer)
+    if (answer) {
+        socket.emit("message", temp, "approved")
+    } else {
+        socket.emit("message", temp, "denied")
+    }
+})
 
 const Canvas = () => {
     const canvasRef = useRef(null);
+    const mouseDown = useRef(false);
     const [context, setContext] = useState(null);
     const [color, setColor] = useState('#00000');
     const [selectedObject, setSelectedObject] = useState(null)
     const [updatePanel, setUpdatePanel] = useState(false)
+    let drawing = false;
     
+    socket.on("clearCanvas", (clearMemoryToo) => {
+        console.log("Received clear canvas, clearing")
+        clearCanvas(clearMemoryToo)
+    })
+
+    socket.on("redraw", () => {
+        drawEverything()
+    })
+
+    function sendClearCanvas(clearMemoryToo) {
+        clearCanvas(clearMemoryToo)
+        socket.emit("sendClearCanvas")
+    }
+
     const clearCanvas = useCallback((clearMemoryToo = true) => {
         if (context) {
             // Below is needed
             if (clearMemoryToo) {
-                clearMemory()
+                socket.emit("clearMemory")
                 setSelectedObject(undefined)
             }
             context.clearRect(
@@ -37,35 +66,47 @@ const Canvas = () => {
 
     const drawEverything = useCallback(() => {
         console.log("re-draw called")
-        let array = getMemory()
-        clearCanvas(false)
-        array.forEach(element => {
-            if (element.type === "text") {
-                addText(context, element, false)
+        if (drawing) {
+            return;
+        }
+        let temp = convertJSONToBuffer({type: "canvas"})
+        socket.emit("message", temp, "canvas", (memory) => {
+            drawing = true;
+            let array = convertBufferToJSON(memory)
+            clearCanvas(false)
+            if (context != null) {
+                array.forEach(element => {
+                    if (element != null) {
+                        if (element.type === "text") {
+                            addText(context, element, false)
+                        }
+                        if (element.type === "line") {
+                            drawLine(context, element.coordinates, false)
+                        }
+                        if (element.type === "note") {
+                            addNote(context, element, false)
+                        }
+                        // if (element.type === "image") {
+                        //     drawLine(context, element.coordinates, false)
+                        // }
+                    }
+                });
             }
-            if (element.type === "line") {
-                drawLine(context, element.coordinates, false)
-            }
-            if (element.type === "note") {
-                addNote(context, element, false)
-            }
-            // if (element.type === "image") {
-            //     drawLine(context, element.coordinates, false)
-            // }
-        });
+            drawing = false;
+        })
+
     }, [context, clearCanvas])
 
     function updatePanelDrawEverything() {
-        if (getElementAt(selectedObject.id) === undefined) {
-            console.log("selectedObject is not in memory")
-            setSelectedObject(undefined)
-        }
+        // if (getElementAt(selectedObject.id) === undefined) {
+        //     console.log("selectedObject is not in memory")
+        //     setSelectedObject(undefined)
+        // }
         setUpdatePanel(!updatePanel)
         drawEverything()
     }
-    
+
     useEffect(() => {
-        let mouseDown = false;
         let start = { x: 0, y: 0 };
         let end = { x: 0, y: 0 };
         let canvasOffsetLeft = 0;
@@ -92,7 +133,7 @@ const Canvas = () => {
         }
 
         function handleMouseDown(evt) {
-            mouseDown = true
+            mouseDown.current = true
 
             start = {
                 x: evt.clientX - canvasOffsetLeft,
@@ -106,11 +147,16 @@ const Canvas = () => {
 
             if (getMouseState().match('text')) {
                 promptForText(context, start)
-                mouseDown = false;
+                mouseDown.current = false;
             }
             else if (getMouseState().match('mouse')) {
-                console.log("mouse down",start)
-                setSelectedObject(handleMouse(context, start))
+                // console.log("mouse down", start)
+
+                socket.emit("message", convertJSONToBuffer({ type: "mouse", coordinates: start }), "checkIfMouseOnObject", (obj) => {
+                    // console.log("selected object", obj)
+                    setSelectedObject(convertBufferToJSON(obj))
+                    mouseDown.current = true;
+                })
             }
             else if (getMouseState().match('note')) {
                 let element = {
@@ -118,26 +164,24 @@ const Canvas = () => {
                     coordinates: start
                 }
                 addNote(context, element)
-                mouseDown = false;
+                mouseDown.current = false;
             }
         }
 
-        function switchUpdatePanel() {
-            if (updatePanel === true) {
-                setUpdatePanel(false)
-            } else {
-                setUpdatePanel(true)
-            }
-        }
-
+    
         function handleMouseUp(evt) {
-            mouseDown = false;
-            switchUpdatePanel()
-            // console.log(updatePanel)
+            mouseDown.current = false;
+            socket.emit("message", convertJSONToBuffer({ type: "mouse", coordinates: start }), "checkIfMouseOnObject", (obj) => {
+                // console.log("selected object", obj)
+                setSelectedObject(convertBufferToJSON(obj))
+            })
         }
 
         function handleMouseMove(evt) {
-            if (mouseDown && context) {
+            if (mouseDown.current === true) {
+                // console.log(mouseDown)
+            }
+            if (mouseDown.current === true && context) {
                 start = {
                     x: end.x,
                     y: end.y,
@@ -148,28 +192,42 @@ const Canvas = () => {
                     y: evt.clientY - canvasOffsetTop,
                 };
 
-                let canvas_mouse_coordinates = {
+                let mouseCoordinates = {
                     start: start,
                     end: end,
                     color: color
                 };
 
-                // Draw our path
-                // console.log(getMouseState())
-                // console.log(selectedObject)
                 if (getMouseState().match('draw')) {
-                    drawLine(context, canvas_mouse_coordinates);
+                    drawLine(context, mouseCoordinates);
                 }
                 else if (getMouseState().match('mouse')) {
-                    if (selectedObject !== undefined || selectedObject != null) {
-                        let update = movingObject(selectedObject.id, canvas_mouse_coordinates)
-                        if (update) {
-                            drawEverything()
-                        }
-                    }
+
+                    // if (selectedObject !== null && selectedObject !== undefined) {
+                    //     // let temp = Object.assign({}, selectedObject)
+                    //     let temp = JSON.parse(JSON.stringify(selectedObject));
+
+                    //     console.log("before", selectedObject)
+                    //     console.log(mouseCoordinates)
+                    //     temp.coordinates.x += mouseCoordinates.end.x - mouseCoordinates.start.x;
+                    //     temp.coordinates.y += mouseCoordinates.end.y - mouseCoordinates.start.y;
+                    //     console.log("after", temp)
+                    //     socket.emit("message", temp, "edit", () => {
+                    //     })
+                    //     drawEverything()
+                    // }
+
+                    let buf = convertJSONToBuffer({ type:"mouse", coordinates: mouseCoordinates })
+                    socket.emit("message", buf, "moveObject", () => {
+                        drawEverything()
+                    })
                 }
+
                 else if (getMouseState().match('eraser')) {
-                    let objectToErase = handleMouse(context, start)
+                    let objectToErase = null;
+                    // socket.emit("message", ({ type: "mouse", coordinates: start }), null, (obj) => {
+                    //     objectToErase = obj
+                    // })
                     if (objectToErase !== undefined || objectToErase != null) {
                         removeElementAt(objectToErase.id);
                         drawEverything()
@@ -188,18 +246,18 @@ const Canvas = () => {
             }
         };
 
-    }, [context, color, clearCanvas, selectedObject, updatePanel, drawEverything]);
+    }, [context, color, clearCanvas, drawEverything, updatePanel]);
 
     return (
         <div id="wrapper">
             <div id="left">
-            <canvas
-                id="canvas"
-                ref={canvasRef}
-                width="1500"
-                height="800"
+                <canvas
+                    id="canvas"
+                    ref={canvasRef}
+                    width="1500"
+                    height="800"
                 ></canvas>
-                <Buttons clearCanvas={clearCanvas} setMouseState={setMouseState}></Buttons>
+                <Buttons sendClearCanvas={sendClearCanvas} setMouseState={setMouseState}></Buttons>
             </div>
             <div id="right">
                 <EditPanel selectedObject={selectedObject} updatePanel={updatePanel} updatePanelDrawEverything={updatePanelDrawEverything}></EditPanel>
