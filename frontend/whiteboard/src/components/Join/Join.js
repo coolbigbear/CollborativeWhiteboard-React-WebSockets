@@ -35,12 +35,13 @@ const Join = () => {
     }
 
     function joinAlreadyCreatedRoom() {
-        socket.emit('join', { name, room }, (error) => {
-            console.log(error)
-            if (error) {
-                alert(error)
-            } else {
-                console.log("joining an existing room");
+        socket.emit('join', { name, room }, (status) => {
+            console.log(status)
+            if (status.error) {
+                alert(status.error)
+            }
+            else if (status.data) {
+                // alert(status.data)
                 history.push(`/room?room=${room}&name=${name}`)
             }
         });

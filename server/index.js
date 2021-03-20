@@ -3,16 +3,14 @@ const socketio = require("socket.io");
 const http = require("http");
 
 const router = require("./router");
-const note = require('./messages/note.js');
-const text = require('./messages/text.js');
-const image = require('./messages/image.js');
-const draw = require('./messages/draw.js');
 const { addUser, getUser, getUsersInRoom, getAdminInRoom, removeUser } = require("./users");
 const { getMemory, clearMemory, checkIfMouseOnObject, getElementAt } = require("./messages/messagesManager");
 const { handleNote } = require("./messages/note.js");
 const { handleMouse } = require("./messages/mouse");
 const { handleText } = require("./messages/text.js");
 const { converJSONToBuffer, convertBufferToJSON } = require("./util/bufferUtils");
+const { handleImage } = require("./messages/image.js");
+const { handleDraw } = require("./messages/draw.js");
 
 const PORT = process.env.PORT || 5000;
 const app = express();
@@ -37,7 +35,7 @@ io.on("connection", (socket) => {
 		const { error, approval, user } = addUser(socket.id, name, room)
 
 		if (error) {
-			return callback(error);
+			return callback({ error: error });
 		}
 
 		if (approval) {
@@ -45,12 +43,12 @@ io.on("connection", (socket) => {
 			let adminID = admin.id
 			console.log(adminID)
 			io.to(adminID).emit("userApprove", user)
-			let error = "Waiting for host to approve"
+			let error = { error: "Waiting for host to approve" }
 			return callback(error)
 		} else {
 			// Send back current whiteboard data
 			let memory = getMemory()
-			return callback()
+			return callback({ data: memory })
 		}
 	});
 
@@ -80,11 +78,15 @@ io.on("connection", (socket) => {
 
 			case 'image':
 				handleImage(data, action);
+				socket.broadcast.emit("redraw")
+				callback()
 				// const activeImages = image.images.filter(/* take the active texts */);
 				break;
 
-			case 'draw':
-				draw(data, action);
+			case 'line':
+				handleDraw(data, action);
+				socket.broadcast.emit("redraw")
+				callback()
 				// const activeDrawings = draw.drawings.filter(/* take the active texts */);
 				break;
 
@@ -101,7 +103,7 @@ io.on("connection", (socket) => {
 				callback(converJSONToBuffer(mem))
 				// const activeDrawings = draw.drawings.filter(/* take the active texts */);
 				break;
-			
+
 			case 'user':
 				console.log("user called", data, action)
 				let userID = getUser(data.user.id).id
@@ -134,6 +136,7 @@ io.on("connection", (socket) => {
 	})
 
 	socket.on("disconnect", () => {
+		removeUser(socket.id)
 		console.log("we have lost conenction!!");
 	});
 });

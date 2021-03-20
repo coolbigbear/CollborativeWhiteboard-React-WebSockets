@@ -9,10 +9,11 @@ export function drawLine(context, coordinates, addToMemoryToo = true) {
     context.lineWidth = 3;
     context.stroke();
     context.closePath();
+    context.lineWidth = 1
 
     if (addToMemoryToo) {
         let obj = {
-            id: getLengthOfMemory() + 1,
+            id: null,
             type: "line",
             width: 10,
             height: 10,

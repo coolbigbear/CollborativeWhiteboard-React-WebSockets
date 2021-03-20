@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
+import { setImage } from '../../messages/image';
 
 import "./Buttons.css"
 
 export default class Buttons extends Component {
-    
+
     componentDidMount() {
         document.getElementById("mouseButton").className = "pressedButton"
     }
@@ -17,7 +18,14 @@ export default class Buttons extends Component {
             });
             document.getElementById(buttonID).className = "pressedButton"
         }
-        
+        function saveCanvasAsImage(type) {
+            var link = document.getElementById('link');
+            var canvas = document.getElementById('canvas');
+            link.setAttribute('download', 'Canvas.png');
+            link.setAttribute('href', canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
+            link.click();
+        }
+
         return (
             <div id="buttonGroup">
                 <button
@@ -36,7 +44,7 @@ export default class Buttons extends Component {
                         this.props.setMouseState('text')
                         pressButton("textButton")
                     }}
-                    >
+                >
                     Text
                 </button>
                 <button
@@ -46,7 +54,7 @@ export default class Buttons extends Component {
                         this.props.setMouseState('draw')
                         pressButton("drawButton")
                     }}
-                    >
+                >
                     Draw
                 </button>
                 <button
@@ -56,19 +64,20 @@ export default class Buttons extends Component {
                         this.props.setMouseState('note')
                         pressButton("noteButton")
                     }}
-                    >
+                >
                     Note
                 </button>
-                <button
-                    id="imageButton"
+                <input type="file" name="imageButton" size="40" id="imageButton" accept="image/jpeg"
                     onClick={() => {
                         console.log("Image button clicked")
                         this.props.setMouseState('image')
                         pressButton("imageButton")
                     }}
-                    >
-                    Upload Image
-                </button>
+                    onChange={(event) => {
+                        setImage(URL.createObjectURL(event.target.files[0]))
+                    }}
+                >
+                </input>
                 <button
                     id="mouseButton"
                     onClick={() => {
@@ -99,6 +108,18 @@ export default class Buttons extends Component {
                 >
                     Undo
                 </button>
+                <button
+                    id="saveAsImageButton"
+                    onClick={() => {
+                        console.log("Save canvas as image button clicked")
+                        this.props.setMouseState('mouse')
+                        pressButton("mouseButton")
+                        saveCanvasAsImage()
+                    }}
+                >
+                    Save canvas as image
+                </button>
+                <a id="link"></a>
             </div>
         )
     }

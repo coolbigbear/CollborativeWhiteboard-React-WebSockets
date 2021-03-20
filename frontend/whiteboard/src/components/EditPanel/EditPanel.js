@@ -3,6 +3,7 @@ import { getElementAt } from '../Canvas/Memory';
 
 import NotePanel from "./NotePanel"
 import TextPanel from "./TextPanel"
+import ImagePanel from "./ImagePanel"
 
 class EditPanel extends React.Component {
     
@@ -29,6 +30,9 @@ class EditPanel extends React.Component {
                     break;
                 case "note":
                     panel = <NotePanel object={this.props.selectedObject} updatePanelDrawEverything={this.props.updatePanelDrawEverything}></NotePanel>
+                    break;
+                case "image":
+                    panel = <ImagePanel object={this.props.selectedObject} updatePanelDrawEverything={this.props.updatePanelDrawEverything}></ImagePanel>
                     break;
                 default:
                     <p>No item selected</p>

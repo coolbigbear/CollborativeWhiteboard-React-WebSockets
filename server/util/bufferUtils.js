@@ -3,7 +3,8 @@ function converJSONToBuffer(json) {
 }
 
 function convertBufferToJSON(buf) {
-    return JSON.parse(String.fromCharCode.apply(null, new Uint8Array(buf)))
+    let string = new TextDecoder().decode(new Uint8Array(buf))
+    return JSON.parse(string)
 }
 
 module.exports = {converJSONToBuffer, convertBufferToJSON}

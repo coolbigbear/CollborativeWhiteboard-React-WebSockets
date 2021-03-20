@@ -11,12 +11,6 @@ class NotePanel extends React.Component {
         super(props)
     }
 
-    componentDidUpdate() {
-        if (this.props.object) {
-            document.getElementById("noteTextArea").focus();
-        }
-    }
-
     render() {
 
         if (this.props.object === null || this.props.object === undefined) {

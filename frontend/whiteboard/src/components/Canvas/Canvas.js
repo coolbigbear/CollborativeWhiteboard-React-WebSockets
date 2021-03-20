@@ -11,6 +11,7 @@ import Buttons from "../Buttons/Buttons";
 import EditPanel from "../EditPanel/EditPanel";
 import socket from "../socket";
 import { convertJSONToBuffer, convertBufferToJSON } from "../../util/bufferUtils";
+import { addImage } from "../../messages/image";
 
 socket.on("userApprove", (user) => {
     console.log("user approve called");
@@ -38,9 +39,7 @@ const Canvas = () => {
         clearCanvas(clearMemoryToo)
     })
 
-    socket.on("redraw", () => {
-        drawEverything()
-    })
+
 
     function sendClearCanvas(clearMemoryToo) {
         clearCanvas(clearMemoryToo)
@@ -70,8 +69,8 @@ const Canvas = () => {
             return;
         }
         let temp = convertJSONToBuffer({type: "canvas"})
+        drawing = true;
         socket.emit("message", temp, "canvas", (memory) => {
-            drawing = true;
             let array = convertBufferToJSON(memory)
             clearCanvas(false)
             if (context != null) {
@@ -86,9 +85,9 @@ const Canvas = () => {
                         if (element.type === "note") {
                             addNote(context, element, false)
                         }
-                        // if (element.type === "image") {
-                        //     drawLine(context, element.coordinates, false)
-                        // }
+                        if (element.type === "image") {
+                            addImage(context, element, false)
+                        }
                     }
                 });
             }
@@ -113,6 +112,10 @@ const Canvas = () => {
         let canvasOffsetTop = 0;
 
         // console.log(React.version)
+
+        socket.on("redraw", () => {
+            drawEverything()
+        })
 
         if (canvasRef.current) {
             const renderCtx = canvasRef.current.getContext("2d");
@@ -151,10 +154,10 @@ const Canvas = () => {
             }
             else if (getMouseState().match('mouse')) {
                 // console.log("mouse down", start)
-
                 socket.emit("message", convertJSONToBuffer({ type: "mouse", coordinates: start }), "checkIfMouseOnObject", (obj) => {
-                    // console.log("selected object", obj)
+                    console.log("selected object", obj)
                     setSelectedObject(convertBufferToJSON(obj))
+                    console.log("selected object", selectedObject)
                     mouseDown.current = true;
                 })
             }
@@ -165,6 +168,12 @@ const Canvas = () => {
                 }
                 addNote(context, element)
                 mouseDown.current = false;
+            }
+            else if (getMouseState().match('image')) {
+                let element = {
+                    coordinates: start
+                }
+                addImage(context, element)
             }
         }
 
@@ -202,21 +211,6 @@ const Canvas = () => {
                     drawLine(context, mouseCoordinates);
                 }
                 else if (getMouseState().match('mouse')) {
-
-                    // if (selectedObject !== null && selectedObject !== undefined) {
-                    //     // let temp = Object.assign({}, selectedObject)
-                    //     let temp = JSON.parse(JSON.stringify(selectedObject));
-
-                    //     console.log("before", selectedObject)
-                    //     console.log(mouseCoordinates)
-                    //     temp.coordinates.x += mouseCoordinates.end.x - mouseCoordinates.start.x;
-                    //     temp.coordinates.y += mouseCoordinates.end.y - mouseCoordinates.start.y;
-                    //     console.log("after", temp)
-                    //     socket.emit("message", temp, "edit", () => {
-                    //     })
-                    //     drawEverything()
-                    // }
-
                     let buf = convertJSONToBuffer({ type:"mouse", coordinates: mouseCoordinates })
                     socket.emit("message", buf, "moveObject", () => {
                         drawEverything()

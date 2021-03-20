@@ -23,7 +23,7 @@ export function changeNotePosition(obj, key, value) {
 }
 
 export function deleteNote(obj) {
-    socket.emit("message", obj, "delete")
+    socket.emit("message", convertJSONToBuffer(obj), "delete")
 }
 
 export function addNote(context, element, addToMemoryToo = true) {
