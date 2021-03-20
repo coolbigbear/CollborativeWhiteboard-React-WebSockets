@@ -5,9 +5,6 @@ function handleText(textData, action) {
     console.log("creating text")
     textData.id = texts.length;
     texts.push(textData);
-    // } else if (action == 'move') {
-    // 	texts[textData.id].xPos = textData.xPos;
-    // 	texts[textData.id].yPos = textData.yPos;
   } else if (action == 'edit') {
     for (let index = 0; index < texts.length; index++) {
       const element = texts[index];

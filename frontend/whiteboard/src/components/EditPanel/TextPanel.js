@@ -1,6 +1,6 @@
 import React from 'react'
 import { changeNoteValues, changeNotePosition } from '../../messages/note'
-import { changeTextPosition, changeTextValues } from '../../messages/text';
+import { changeTextPosition, changeTextValues, deleteText } from '../../messages/text';
 import { getElementAt, removeElementAt } from '../Canvas/Memory'
 
 
@@ -83,7 +83,7 @@ class NotePanel extends React.Component {
                 />
                 <button
                     onClick={() => {
-                        removeElementAt(this.props.object)
+                        deleteText(this.props.object)
                         this.props.updatePanelDrawEverything()
                     }}
                 >

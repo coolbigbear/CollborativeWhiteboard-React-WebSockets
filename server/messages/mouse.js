@@ -1,4 +1,5 @@
 const { converJSONToBuffer } = require("../util/bufferUtils");
+const { removeElementAt } = require("./messagesManager");
 const { checkIfMouseOnObject, getElementAt, replaceElementAt, getMemory } = require("./messagesManager");
 
 function handleMouse(mouseData, action, callback, socket) {
@@ -28,10 +29,13 @@ function handleMouse(mouseData, action, callback, socket) {
             }
         }
     } else if (action == 'delete') {
-        delete notes[noteData.id];
+        let obj = checkIfMouseOnObject(mouseData.coordinates.start)
+        if (obj != null) {
+            removeElementAt(obj.id, obj)
+            socket.emit("redraw")
+        }
     } else {
         console.log("Wow")
-
     }
 }
 

@@ -155,9 +155,9 @@ const Canvas = () => {
             else if (getMouseState().match('mouse')) {
                 // console.log("mouse down", start)
                 socket.emit("message", convertJSONToBuffer({ type: "mouse", coordinates: start }), "checkIfMouseOnObject", (obj) => {
-                    console.log("selected object", obj)
+                    // console.log("selected object", obj)
                     setSelectedObject(convertBufferToJSON(obj))
-                    console.log("selected object", selectedObject)
+                    // console.log("selected object", selectedObject)
                     mouseDown.current = true;
                 })
             }
@@ -216,21 +216,18 @@ const Canvas = () => {
                         drawEverything()
                     })
                 }
-
+                
                 else if (getMouseState().match('eraser')) {
-                    let objectToErase = null;
-                    // socket.emit("message", ({ type: "mouse", coordinates: start }), null, (obj) => {
-                    //     objectToErase = obj
-                    // })
-                    if (objectToErase !== undefined || objectToErase != null) {
-                        removeElementAt(objectToErase.id);
-                        drawEverything()
-                    }
+                    // let objectToErase = null;
+                    let buf = convertJSONToBuffer({ type:"mouse", coordinates: mouseCoordinates })
+                    socket.emit("message", buf, "delete")
+                    // if (objectToErase !== undefined || objectToErase != null) {
+                    //     removeElementAt(objectToErase.id);
+                    //     drawEverything()
+                    // }
                 }
             }
         }
-
-
 
         return function cleanup() {
             if (canvasRef.current) {

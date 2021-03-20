@@ -1,11 +1,8 @@
 
-const { getLines, clearLines } = require("./draw");
-const draw = require("./draw");
+const { getLines, clearLines, handleDraw } = require("./draw");
 const { clearImages, getImages, handleImage } = require("./image");
-const image = require("./image");
 const { clearNotes, handleNote, getNotes } = require("./note");
 const { handleText, clearTexts, getTexts } = require("./text");
-const text = require("./text")
 
 function addToMemory(obj) {
     switchCaseForElements(obj, "create")
@@ -43,9 +40,9 @@ function getMemory() {
     let everythingArray = []
 
     let activeNotes = getNotes()/*.filter( take the active texts );*/
-    const activeTexts = getTexts()/*.filter(/* take the active texts );*/
-    const activeImages = getImages()/*.filter(/* take the active texts );*/
-    const activeLines = getLines()/*.filter(/* take the active texts );*/
+    let activeTexts = getTexts()/*.filter(/* take the active texts );*/
+    let activeImages = getImages()/*.filter(/* take the active texts );*/
+    let activeLines = getLines()/*.filter(/* take the active texts );*/
     everythingArray = everythingArray.concat(activeNotes)
     everythingArray = everythingArray.concat(activeTexts)
     everythingArray = everythingArray.concat(activeImages)
@@ -57,12 +54,8 @@ function getMemory() {
 function getElementAt(id) {
 
     let memory = getMemory();
-
-    return memory.find(element => {
-        if (element != null) {
-            element.id === id
-        }
-    })
+    // console.log("memory", memory)
+    return memory.find(element => element.id == id)
 }
 
 function replaceElementAt(obj) {
@@ -76,13 +69,16 @@ function clearMemory() {
     clearLines()
 }
 
-function removeElementAt(id) {
-
-    let obj = getElementAt(id)
+function removeElementAt(id, obj=null) {
+    // console.log("here1", obj)
+    if (obj != null) {
+        obj = getElementAt(id)
+    }
     switchCaseForElements(obj, "delete")
 }
 
 function switchCaseForElements(obj, action) {
+    // console.log("switch case ", obj, action)
     switch (obj.type) {
         case ("note"):
             handleNote(obj, action)
@@ -93,7 +89,7 @@ function switchCaseForElements(obj, action) {
         case ("image"):
             handleImage(obj, action)
             break;
-        case ("draw"):
+        case ("line"):
             handleDraw(obj, action)
             break;
 

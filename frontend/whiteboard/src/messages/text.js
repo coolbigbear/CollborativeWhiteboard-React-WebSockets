@@ -23,6 +23,10 @@ export function changeTextPosition(obj, key, value) {
     socket.emit("message", convertJSONToBuffer(obj), "edit")
 }
 
+export function deleteText(obj) {
+    socket.emit("message", convertJSONToBuffer(obj), "delete")
+}
+
 export function addText(context, element, addToMemoryToo = true) {
 
     let FONT_COLOR = "#000000"
@@ -45,21 +49,23 @@ export function addText(context, element, addToMemoryToo = true) {
     context.fillText(element.text, element.coordinates.x, element.coordinates.y);
 
     // console.log("element", element)
-    let width =  calculateTextWidth(context, element).width
-    let height = calculateTextWidth(context, element).actualBoundingBoxAscent
-    if (element.width !== width || element.height !== height) {
-        // Recalc width and height of text
-        console.log("resizing text")
-        element.height = height
-        element.width = width
-        socket.emit("message", convertJSONToBuffer(element), "edit")
+    if (element.hasOwnProperty('width') || element.hasOwnProperty('height')) {
+        let width = calculateTextWidth(context, element).width
+        let height = calculateTextWidth(context, element).actualBoundingBoxAscent
+        if (element.width !== width || element.height !== height) {
+            // Recalc width and height of text
+            console.log("resizing text")
+            element.height = height
+            element.width = width
+            socket.emit("message", convertJSONToBuffer(element), "edit")
 
+        }
     }
 
     if (addToMemoryToo) {
-        console.log("adding text to memory")
+        console.log("adding text to memory ", element)
         let obj = {
-            id: getLengthOfMemory() + 1,
+            id: null,
             type: "text",
             text: element.text,
             fontSize: FONT_SIZE,
