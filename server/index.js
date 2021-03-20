@@ -92,8 +92,8 @@ io.on("connection", (socket) => {
 
 			case 'mouse':
 				// console.log("handling mouse", data, action, callback)
-				handleMouse(data, action, callback)
-				socket.broadcast.emit("redraw")
+				handleMouse(data, action, callback, socket)
+				// socket.broadcast.emit("redraw")
 				// const activeDrawings = draw.drawings.filter(/* take the active texts */);
 				break;
 

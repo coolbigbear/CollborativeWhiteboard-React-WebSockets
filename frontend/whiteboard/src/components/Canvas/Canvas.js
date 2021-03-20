@@ -32,7 +32,7 @@ const Canvas = () => {
     const [color, setColor] = useState('#00000');
     const [selectedObject, setSelectedObject] = useState(null)
     const [updatePanel, setUpdatePanel] = useState(false)
-    let drawing = false;
+    let drawing = false
     
     socket.on("clearCanvas", (clearMemoryToo) => {
         console.log("Received clear canvas, clearing")
@@ -64,12 +64,12 @@ const Canvas = () => {
     }, [context])
 
     const drawEverything = useCallback(() => {
-        console.log("re-draw called")
         if (drawing) {
             return;
         }
-        let temp = convertJSONToBuffer({type: "canvas"})
         drawing = true;
+        console.log("re-draw called")
+        let temp = convertJSONToBuffer({type: "canvas"})
         socket.emit("message", temp, "canvas", (memory) => {
             let array = convertBufferToJSON(memory)
             clearCanvas(false)

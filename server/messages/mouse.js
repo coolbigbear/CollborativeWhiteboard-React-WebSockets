@@ -1,7 +1,7 @@
 const { converJSONToBuffer } = require("../util/bufferUtils");
 const { checkIfMouseOnObject, getElementAt, replaceElementAt, getMemory } = require("./messagesManager");
 
-function handleMouse(mouseData, action, callback) {
+function handleMouse(mouseData, action, callback, socket) {
     // console.log("action is", action)
     // console.log(mouseData)
     if (action === 'checkIfMouseOnObject') {
@@ -17,6 +17,7 @@ function handleMouse(mouseData, action, callback) {
             obj.coordinates.y += mouseData.coordinates.end.y - mouseData.coordinates.start.y;
             replaceElementAt(obj)
             callback()
+            socket.broadcast.emit("redraw")
         }
     } else if (action == 'edit') {
         for (let index = 0; index < notes.length; index++) {
