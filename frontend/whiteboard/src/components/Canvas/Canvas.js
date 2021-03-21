@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
 import "./Canvas.css";
-import { getMemory, clearMemory, removeElementAt, getElementAt } from "./Memory"
 import { addText, promptForText } from "../../messages/text"
 import { drawLine } from "../../messages/draw";
-import { getMouseState, handleMouse, movingObject, setMouseState } from "../../messages/mouse";
-import { addNote, promptForNote } from "../../messages/note";
+import { getMouseState, handleMouse, setMouseState } from "../../messages/mouse";
+import { addNote } from "../../messages/note";
 
 import Buttons from "../Buttons/Buttons";
 import EditPanel from "../EditPanel/EditPanel";
 import socket from "../socket";
-import { convertJSONToBuffer, convertBufferToJSON } from "../../util/bufferUtils";
+import { convertJSONToBuffer, convertBufferToJSON, convertBufferToMap } from "../../util/bufferUtils";
 import { addImage } from "../../messages/image";
+import { clearMemory, getMemory, checkIfMouseOnObject } from "./Memory";
 
 socket.on("userApprove", (user) => {
     console.log("user approve called");
@@ -32,25 +32,28 @@ const Canvas = () => {
     const [color, setColor] = useState('#00000');
     const [selectedObject, setSelectedObject] = useState(null)
     const [updatePanel, setUpdatePanel] = useState(false)
-    let drawing = false
-    
-    socket.on("clearCanvas", (clearMemoryToo) => {
+
+    socket.on("clearCanvas", () => {
         console.log("Received clear canvas, clearing")
-        clearCanvas(clearMemoryToo)
+        clearCanvas()
     })
-
-
 
     function sendClearCanvas(clearMemoryToo) {
         clearCanvas(clearMemoryToo)
         socket.emit("sendClearCanvas")
     }
 
+    socket.on("initCanvas", () => {
+        console.log("Initilising canvas")
+    })
+
     const clearCanvas = useCallback((clearMemoryToo = true) => {
         if (context) {
             // Below is needed
+            // console.log("ClearMEMTOO", clearMemoryToo)
             if (clearMemoryToo) {
-                socket.emit("clearMemory")
+                clearMemory()
+                // socket.emit("clearMemory")
                 setSelectedObject(undefined)
             }
             context.clearRect(
@@ -63,46 +66,35 @@ const Canvas = () => {
         }
     }, [context])
 
-    const drawEverything = useCallback(() => {
-        if (drawing) {
-            return;
-        }
-        drawing = true;
-        console.log("re-draw called")
-        let temp = convertJSONToBuffer({type: "canvas"})
-        socket.emit("message", temp, "canvas", (memory) => {
-            let array = convertBufferToJSON(memory)
-            clearCanvas(false)
-            if (context != null) {
-                array.forEach(element => {
-                    if (element != null) {
-                        if (element.type === "text") {
-                            addText(context, element, false)
-                        }
-                        if (element.type === "line") {
-                            drawLine(context, element.coordinates, false)
-                        }
-                        if (element.type === "note") {
-                            addNote(context, element, false)
-                        }
-                        if (element.type === "image") {
-                            addImage(context, element, false)
-                        }
+    function drawEverything() {
+        // console.log("re-draw called")
+        let map = getMemory()
+        // console.log(map)
+        clearCanvas(false)
+        if (context != null) {
+            map.forEach(element => {
+                if (element != null) {
+                    if (element.type === "text") {
+                        addText(context, element, false)
                     }
-                });
-            }
-            drawing = false;
-        })
-
-    }, [context, clearCanvas])
+                    if (element.type === "line") {
+                        drawLine(context, element.coordinates, false)
+                    }
+                    if (element.type === "note") {
+                        addNote(context, element, false)
+                    }
+                    if (element.type === "image") {
+                        addImage(context, element, false)
+                    }
+                }
+            });
+        }
+        window.requestAnimationFrame(drawEverything)
+    }
+    window.requestAnimationFrame(drawEverything)
 
     function updatePanelDrawEverything() {
-        // if (getElementAt(selectedObject.id) === undefined) {
-        //     console.log("selectedObject is not in memory")
-        //     setSelectedObject(undefined)
-        // }
         setUpdatePanel(!updatePanel)
-        drawEverything()
     }
 
     useEffect(() => {
@@ -113,9 +105,6 @@ const Canvas = () => {
 
         // console.log(React.version)
 
-        socket.on("redraw", () => {
-            drawEverything()
-        })
 
         if (canvasRef.current) {
             const renderCtx = canvasRef.current.getContext("2d");
@@ -154,12 +143,8 @@ const Canvas = () => {
             }
             else if (getMouseState().match('mouse')) {
                 // console.log("mouse down", start)
-                socket.emit("message", convertJSONToBuffer({ type: "mouse", coordinates: start }), "checkIfMouseOnObject", (obj) => {
-                    // console.log("selected object", obj)
-                    setSelectedObject(convertBufferToJSON(obj))
-                    // console.log("selected object", selectedObject)
-                    mouseDown.current = true;
-                })
+                setSelectedObject(checkIfMouseOnObject(start))
+                console.log(checkIfMouseOnObject(start))
             }
             else if (getMouseState().match('note')) {
                 let element = {
@@ -174,16 +159,19 @@ const Canvas = () => {
                     coordinates: start
                 }
                 addImage(context, element)
+                mouseDown.current = false;
             }
         }
 
-    
+
         function handleMouseUp(evt) {
             mouseDown.current = false;
-            socket.emit("message", convertJSONToBuffer({ type: "mouse", coordinates: start }), "checkIfMouseOnObject", (obj) => {
-                // console.log("selected object", obj)
-                setSelectedObject(convertBufferToJSON(obj))
-            })
+            setSelectedObject(checkIfMouseOnObject(start))
+            // socket.emit("message", convertJSONToBuffer({ type: "mouse", coordinates: start }), "checkIfMouseOnObject", (obj) => {
+            //     // console.log("selected object", obj)
+            //     setSelectedObject(convertBufferToJSON(obj))
+            // })
+            // drawEverything()
         }
 
         function handleMouseMove(evt) {
@@ -211,20 +199,26 @@ const Canvas = () => {
                     drawLine(context, mouseCoordinates);
                 }
                 else if (getMouseState().match('mouse')) {
-                    let buf = convertJSONToBuffer({ type:"mouse", coordinates: mouseCoordinates })
-                    socket.emit("message", buf, "moveObject", () => {
-                        drawEverything()
-                    })
+                    // let buf = convertJSONToBuffer({ type: "mouse", coordinates: mouseCoordinates })
+                    // socket.emit("message", buf, "moveObject", () => {
+                    //     // window.requestAnimationFrame(drawEverything)
+                    //     drawEverything()
+                    // })
+                    handleMouse({ coordinates: mouseCoordinates }, "moveObject")
+                    // drawEverything()
                 }
                 
                 else if (getMouseState().match('eraser')) {
                     // let objectToErase = null;
-                    let buf = convertJSONToBuffer({ type:"mouse", coordinates: mouseCoordinates })
-                    socket.emit("message", buf, "delete")
+                    // let buf = convertJSONToBuffer({ type: "mouse", coordinates: mouseCoordinates })
+                    // socket.emit("message", buf, "delete")
                     // if (objectToErase !== undefined || objectToErase != null) {
-                    //     removeElementAt(objectToErase.id);
+                        //     removeElementAt(objectToErase.id);
                     //     drawEverything()
                     // }
+                    handleMouse({ coordinates: mouseCoordinates }, "delete")
+                    // drawEverything()
+                    
                 }
             }
         }
@@ -237,7 +231,7 @@ const Canvas = () => {
             }
         };
 
-    }, [context, color, clearCanvas, drawEverything, updatePanel]);
+    }, [context, color, clearCanvas, updatePanel]);
 
     return (
         <div id="wrapper">

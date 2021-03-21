@@ -1,4 +1,4 @@
-const { converJSONToBuffer } = require("../util/bufferUtils");
+const { convertJSONToBuffer } = require("../util/bufferUtils");
 const { removeElementAt } = require("./messagesManager");
 const { checkIfMouseOnObject, getElementAt, replaceElementAt, getMemory } = require("./messagesManager");
 
@@ -7,10 +7,11 @@ function handleMouse(mouseData, action, callback, socket) {
     // console.log(mouseData)
     if (action === 'checkIfMouseOnObject') {
         let obj = checkIfMouseOnObject(mouseData.coordinates)
+        // console.log(obj)
         if (obj === undefined) {
             obj = {}
         }
-        callback(converJSONToBuffer(obj))
+        callback(convertJSONToBuffer(obj))
     } else if (action == 'moveObject') {
         let obj = checkIfMouseOnObject(mouseData.coordinates.end)
         if (obj != null) {
@@ -35,7 +36,8 @@ function handleMouse(mouseData, action, callback, socket) {
             socket.emit("redraw")
         }
     } else {
-        console.log("Wow")
+        console.log("--- Warning ---")
+        console.log("Received unknown action")
     }
 }
 

@@ -1,5 +1,11 @@
-function converJSONToBuffer(json) {
+function convertJSONToBuffer(json) {
+    // console.log(JSON.stringify(json))
     return Buffer.from(JSON.stringify(json))
+}
+
+function convertMapToBuffer(map) {
+    let array = Array.from(map.values())
+    return Buffer.from(JSON.stringify(array))
 }
 
 function convertBufferToJSON(buf) {
@@ -7,4 +13,4 @@ function convertBufferToJSON(buf) {
     return JSON.parse(string)
 }
 
-module.exports = {converJSONToBuffer, convertBufferToJSON}
+module.exports = {convertJSONToBuffer, convertMapToBuffer, convertBufferToJSON}

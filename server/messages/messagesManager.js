@@ -1,34 +1,30 @@
+const { getUser, getUsersInRoom } = require("../users");
 
-const { getLines, clearLines, handleDraw } = require("./draw");
-const { clearImages, getImages, handleImage } = require("./image");
-const { clearNotes, handleNote, getNotes } = require("./note");
-const { handleText, clearTexts, getTexts } = require("./text");
+let memory = new Map()
 
 function addToMemory(obj) {
-    switchCaseForElements(obj, "create")
+    handleMessage(obj, "create")
 }
 
 function checkIfMouseOnObject(coordinates) {
 
-    let memory = getMemory()
-
-    for (let i = 0; i < memory.length; i++) {
-        if (memory[i] != null) {
-            if (memory[i].type === "line") {
-                if (coordinates.x >= memory[i].coordinates.start.x && coordinates.x <= memory[i].coordinates.start.x + memory[i].width && coordinates.y >= memory[i].coordinates.start.y - memory[i].height && coordinates.y <= memory[i].coordinates.start.y + memory[i].height) {
-                    return memory[i];
+    for (let i = memory.size; i > 0; i--) {
+        let value = memory.get(i-1)
+        if (value != null) {
+            if (value.type === "line") {
+                if (coordinates.x >= value.coordinates.start.x && coordinates.x <= value.coordinates.start.x + value.width && coordinates.y >= value.coordinates.start.y - value.height && coordinates.y <= value.coordinates.start.y + value.height) {
+                    return value;
                 }
             }
-
-            else if (memory[i].type === "note" || memory[i].type === "image") {
-                if (coordinates.x >= memory[i].coordinates.x && coordinates.x <= memory[i].coordinates.x + memory[i].width && coordinates.y <= memory[i].coordinates.y + memory[i].height && coordinates.y >= memory[i].coordinates.y) {
-                    return memory[i];
+            else if (value.type === "note" || value.type === "image") {
+                if (coordinates.x >= value.coordinates.x && coordinates.x <= value.coordinates.x + value.width && coordinates.y <= value.coordinates.y + value.height && coordinates.y >= value.coordinates.y) {
+                    return value;
                 }
             }
 
             else {
-                if (coordinates.x >= memory[i].coordinates.x && coordinates.x <= memory[i].coordinates.x + memory[i].width && coordinates.y >= memory[i].coordinates.y - memory[i].height && coordinates.y <= memory[i].coordinates.y) {
-                    return memory[i];
+                if (coordinates.x >= value.coordinates.x && coordinates.x <= value.coordinates.x + value.width && coordinates.y >= value.coordinates.y - value.height && coordinates.y <= value.coordinates.y) {
+                    return value;
                 }
             }
         }
@@ -36,37 +32,19 @@ function checkIfMouseOnObject(coordinates) {
 }
 
 function getMemory() {
-
-    let everythingArray = []
-
-    let activeNotes = getNotes()/*.filter( take the active texts );*/
-    let activeTexts = getTexts()/*.filter(/* take the active texts );*/
-    let activeImages = getImages()/*.filter(/* take the active texts );*/
-    let activeLines = getLines()/*.filter(/* take the active texts );*/
-    everythingArray = everythingArray.concat(activeNotes)
-    everythingArray = everythingArray.concat(activeTexts)
-    everythingArray = everythingArray.concat(activeImages)
-    everythingArray = everythingArray.concat(activeLines)
-
-    return everythingArray;
+    return memory
 }
 
 function getElementAt(id) {
-
-    let memory = getMemory();
-    // console.log("memory", memory)
-    return memory.find(element => element.id == id)
+    return memory.get(id)
 }
 
 function replaceElementAt(obj) {
-    switchCaseForElements(obj, "edit")
+    handleMessage(obj, "edit")
 }
 
 function clearMemory() {
-    clearNotes()
-    clearTexts()
-    clearImages()
-    clearLines()
+    memory.clear()
 }
 
 function removeElementAt(id, obj=null) {
@@ -74,28 +52,24 @@ function removeElementAt(id, obj=null) {
     if (obj != null) {
         obj = getElementAt(id)
     }
-    switchCaseForElements(obj, "delete")
+    handleMessage(obj, "delete")
 }
 
-function switchCaseForElements(obj, action) {
-    // console.log("switch case ", obj, action)
-    switch (obj.type) {
-        case ("note"):
-            handleNote(obj, action)
-            break;
-        case ("text"):
-            handleText(obj, action)
-            break;
-        case ("image"):
-            handleImage(obj, action)
-            break;
-        case ("line"):
-            handleDraw(obj, action)
-            break;
-
-        default:
-
+function handleMessage(data, action) {
+    if (action === 'create') {
+        console.log("creating ", data.type)
+        data.id = memory.size;
+        memory.set(data.id, data)
+        // console.log(memory)
+    } else if (action == 'edit') {
+        memory.set(data.id, data)
+    } else if (action == 'delete') {
+        console.log("Deleting ", data.type)
+        memory.delete(data.id)
+    } else {
+        console.log("--- Warning ---")
+        console.log("Received unknown action")
     }
 }
 
-module.exports = { removeElementAt, clearMemory, replaceElementAt, getElementAt, addToMemory, checkIfMouseOnObject, getMemory }
+module.exports = { removeElementAt, clearMemory, replaceElementAt, getElementAt, addToMemory, checkIfMouseOnObject, getMemory, handleMessage }

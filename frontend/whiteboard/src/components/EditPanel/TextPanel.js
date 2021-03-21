@@ -29,6 +29,8 @@ class NotePanel extends React.Component {
 
         return (
             <div>
+                <h3>Author</h3>
+                <p>{this.props.object.author}</p>
                 <h3>Text</h3>
                 <textarea
                     id="textTextArea"

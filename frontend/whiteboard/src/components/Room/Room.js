@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import queryString from 'query-string'
 import Canvas from '../Canvas/Canvas'
 import socket from '../socket'
+import { convertBufferToMap } from '../../util/bufferUtils'
+import { setMemory } from '../Canvas/Memory'
 
 const Room = ({ location }) => {
 
     const [name, setName] = useState('');
     const [room, setRoom] = useState('');
-    const [users, setUsers] = useState([]);
-    let history = useHistory()
 
 
     useEffect(() => {
@@ -19,12 +18,12 @@ const Room = ({ location }) => {
         setName(name);
         setRoom(room);
 
-        console.log("wow")
-        console.log(socket)
+        socket.emit("initCanvas")
 
-        
-
-        socket.on('poke');
+        socket.on("initCanvas", (memory) => {
+            console.log("INCOMING MEMORY", convertBufferToMap(memory))
+            setMemory(convertBufferToMap(memory))
+        })
 
         return () => {
             socket.emit('disconnect');

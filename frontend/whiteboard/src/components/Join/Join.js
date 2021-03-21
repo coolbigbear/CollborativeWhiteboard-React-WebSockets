@@ -37,10 +37,10 @@ const Join = () => {
     function joinAlreadyCreatedRoom() {
         socket.emit('join', { name, room }, (status) => {
             console.log(status)
-            if (status.error) {
+            if (status) {
                 alert(status.error)
             }
-            else if (status.data) {
+            else {
                 // alert(status.data)
                 history.push(`/room?room=${room}&name=${name}`)
             }

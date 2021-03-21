@@ -4,13 +4,9 @@ const http = require("http");
 
 const router = require("./router");
 const { addUser, getUser, getUsersInRoom, getAdminInRoom, removeUser } = require("./users");
-const { getMemory, clearMemory, checkIfMouseOnObject, getElementAt } = require("./messages/messagesManager");
-const { handleNote } = require("./messages/note.js");
+const { getMemory, getMemorySorted, clearMemory, handleMessage } = require("./messages/messagesManager");
 const { handleMouse } = require("./messages/mouse");
-const { handleText } = require("./messages/text.js");
-const { converJSONToBuffer, convertBufferToJSON } = require("./util/bufferUtils");
-const { handleImage } = require("./messages/image.js");
-const { handleDraw } = require("./messages/draw.js");
+const { convertJSONToBuffer, convertBufferToJSON, convertMapToBuffer } = require("./util/bufferUtils");
 
 const PORT = process.env.PORT || 5000;
 const app = express();
@@ -46,74 +42,55 @@ io.on("connection", (socket) => {
 			let error = { error: "Waiting for host to approve" }
 			return callback(error)
 		} else {
-			// Send back current whiteboard data
-			let memory = getMemory()
-			return callback({ data: memory })
+			callback()
 		}
 	});
 
-	socket.on("message", (data, action, callback = (() => { })) => {
+	socket.on("message", (data, action) => {
 
-		// console.log(data, action, callback)
-		// console.log(action)
-		data = convertBufferToJSON(data)
+		dataJSON = convertBufferToJSON(data)
 
-		switch (data.type) {
-
+		switch (dataJSON.type) {
 			case 'note':
-				// console.log("Handling note")
-				handleNote(data, action);
-				socket.broadcast.emit("redraw")
-				callback()
-				// const activeNotes = note.notes.filter(/* take the active texts */);
+				handleMessage(dataJSON, action)
+				socket.broadcast.emit("message", data, action)
 				break;
 
 			case 'text':
-				// console.log("handling text")
-				handleText(data, action);
-				socket.broadcast.emit("redraw")
-				callback()
-				// const activeTexts = text.texts.filter(/* take the active texts */);
+				handleMessage(dataJSON, action)
+				socket.broadcast.emit("message", data, action)
 				break;
 
 			case 'image':
-				handleImage(data, action);
-				socket.broadcast.emit("redraw")
-				callback()
-				// const activeImages = image.images.filter(/* take the active texts */);
+				handleMessage(dataJSON, action)
+				socket.broadcast.emit("message", data, action)
 				break;
 
 			case 'line':
-				handleDraw(data, action);
-				socket.broadcast.emit("redraw")
-				callback()
-				// const activeDrawings = draw.drawings.filter(/* take the active texts */);
-				break;
-
-			case 'mouse':
-				// console.log("handling mouse", data, action, callback)
-				handleMouse(data, action, callback, socket)
-				// socket.broadcast.emit("redraw")
-				// const activeDrawings = draw.drawings.filter(/* take the active texts */);
+				handleMessage(dataJSON, action)
+				socket.broadcast.emit("message", data, action)
 				break;
 
 			case 'canvas':
 				// console.log("Canvas called")
 				let mem = getMemory()
-				callback(converJSONToBuffer(mem))
+				callback(convertMapToBuffer(mem))
 				// const activeDrawings = draw.drawings.filter(/* take the active texts */);
 				break;
 
 			case 'user':
-				console.log("user called", data, action)
-				let userID = getUser(data.user.id).id
+				console.log("user called", dataJSON, action)
+				let user = getUser(dataJSON.user.id)
+				let userID = user.id
 				if (action == "approved") {
 					console.log("Approving user")
-					io.to(userID).emit("approved", data.user)
+					io.to(userID).emit("approved", dataJSON.user)
+					io.to(userID).emit("redraw")
 				}
 				else if (action == "denied") {
 					console.log("Denying user")
-					io.to(userID).emit("denied", data.user)
+					io.to(userID).emit("denied", dataJSON.user)
+					console.log("Removing user")
 					removeUser(userID)
 				}
 				// const activeDrawings = draw.drawings.filter(/* take the active texts */);
@@ -125,17 +102,28 @@ io.on("connection", (socket) => {
 
 	});
 
-	socket.on("sendClearCanvas", (clearMemoryToo) => {
-		console.log("Received clear canvas, broadcasting back")
-		socket.broadcast.emit("clearCanvas", clearMemoryToo)
-	});
-
-	socket.on("clearMemory", () => {
-		console.log("Clearing memory")
-		clearMemory()
+	socket.on("initCanvas", () => {
+		console.log("Initilising canvas for new user")
+		console.log("Socket ID", socket.id)
+		let user = getUser(socket.id)
+		console.log("USER", user)
+		if (user != null) {
+			let admin = getAdminInRoom(user.room)
+			if (admin != null) {
+				// Send back current whiteboard data
+				io.to(socket.id).emit("initCanvas", convertMapToBuffer(getMemory()))
+			}
+		}
 	})
 
+	socket.on("sendClearCanvas", () => {
+		console.log("Received clear canvas, broadcasting back")
+		clearMemory()
+		socket.broadcast.emit("clearCanvas")
+	});
+
 	socket.on("disconnect", () => {
+		// Remove disconnected user
 		removeUser(socket.id)
 		console.log("we have lost conenction!!");
 	});
@@ -146,5 +134,3 @@ app.use(router);
 server.listen(PORT, () =>
 	console.log(`Server has already started on port ${PORT}`)
 );
-
-// module.exports = ({whiteboardItems})

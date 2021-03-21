@@ -1,4 +1,4 @@
-import { addToMemory, getElementAt, getLengthOfMemory, replaceElementAt } from '../components/Canvas/Memory'
+import { addToMemory, getElementAt, getLengthOfMemory, handleMessage, replaceElementAt } from '../components/Canvas/Memory'
 import socket from '../components/socket';
 import { convertJSONToBuffer } from '../util/bufferUtils';
 
@@ -14,16 +14,19 @@ export function promptForNote(context, coordinates) {
 
 export function changeNoteValues(obj, key, value) {
     obj[key] = value
-    socket.emit("message", convertJSONToBuffer(obj), "edit")
+    handleMessage(obj, "edit")
+    // socket.emit("message", convertJSONToBuffer(obj), "edit")
 }
 
 export function changeNotePosition(obj, key, value) {
     obj["coordinates"][key] = value
-    socket.emit("message", convertJSONToBuffer(obj), "edit")
+    handleMessage(obj, "edit")
+    // socket.emit("message", convertJSONToBuffer(obj), "edit")
 }
 
 export function deleteNote(obj) {
-    socket.emit("message", convertJSONToBuffer(obj), "delete")
+    handleMessage(obj, "delete")
+    // socket.emit("message", convertJSONToBuffer(obj), "delete")
 }
 
 export function addNote(context, element, addToMemoryToo = true) {
@@ -90,7 +93,6 @@ export function addNote(context, element, addToMemoryToo = true) {
 
     if (addToMemoryToo) {
         let obj = {
-            id: getLengthOfMemory() + 1,
             type: "note",
             text: element.text,
             fontSize: FONT_SIZE,

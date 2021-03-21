@@ -11,6 +11,10 @@ export default class Buttons extends Component {
 
     render() {
 
+        function undoButtonPress() {
+            
+        }
+
         function pressButton(buttonID) {
             var buttons = document.getElementById("buttonGroup").childNodes
             buttons.forEach(button => {
@@ -18,6 +22,7 @@ export default class Buttons extends Component {
             });
             document.getElementById(buttonID).className = "pressedButton"
         }
+
         function saveCanvasAsImage(type) {
             var link = document.getElementById('link');
             var canvas = document.getElementById('canvas');
@@ -104,6 +109,7 @@ export default class Buttons extends Component {
                         console.log("Undo button clicked")
                         this.props.setMouseState('mouse')
                         pressButton("mouseButton")
+                        undoButtonPress()
                     }}
                 >
                     Undo

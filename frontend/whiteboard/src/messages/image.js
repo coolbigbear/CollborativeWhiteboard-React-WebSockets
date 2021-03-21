@@ -1,4 +1,4 @@
-import { addToMemory, getElementAt, getLengthOfMemory, replaceElementAt } from '../components/Canvas/Memory'
+import { addToMemory, getElementAt, getLengthOfMemory, handleMessage, replaceElementAt } from '../components/Canvas/Memory'
 import socket from '../components/socket';
 import { convertJSONToBuffer } from '../util/bufferUtils';
 
@@ -6,16 +6,19 @@ let img = null;
 
 export function changeImageValues(obj, key, value) {
     obj[key] = value
-    socket.emit("message", convertJSONToBuffer(obj), "edit")
+    handleMessage(obj, "edit")
+    // socket.emit("message", convertJSONToBuffer(obj), "edit")
 }
 
 export function changeImagePosition(obj, key, value) {
     obj["coordinates"][key] = value
-    socket.emit("message", convertJSONToBuffer(obj), "edit")
+    handleMessage(obj, "edit")
+    // socket.emit("message", convertJSONToBuffer(obj), "edit")
 }
 
 export function deleteImage(obj) {
-    socket.emit("message", convertJSONToBuffer(obj), "delete")
+    handleMessage(obj, "delete")
+    // socket.emit("message", convertJSONToBuffer(obj), "delete")
 }
 
 export function setImage(url) {
@@ -35,22 +38,36 @@ export async function addImage(context, element, addToMemoryToo = true) {
         image.src = img;
     }
 
+    //Both below and above block are needed
+    if (element.hasOwnProperty('width')) {
+        IMG_WIDTH = element.width
+    } else {
+        IMG_WIDTH = image.naturalWidth
+    }
+
+    if (element.hasOwnProperty('height')) {
+        IMG_HEIGHT = element.height
+    } else {
+        IMG_HEIGHT = image.naturalHeight
+    }
+    
+    context.drawImage(image, element.coordinates.x, element.coordinates.y, IMG_WIDTH, IMG_HEIGHT)
+    
     image.addEventListener('load', function () {
-        // once the image is loaded:
+        
+        //Both below and above block are needed
         if (element.hasOwnProperty('width')) {
             IMG_WIDTH = element.width
         } else {
             IMG_WIDTH = image.naturalWidth
         }
-
+    
         if (element.hasOwnProperty('height')) {
             IMG_HEIGHT = element.height
         } else {
             IMG_HEIGHT = image.naturalHeight
         }
-
-        context.drawImage(image, element.coordinates.x, element.coordinates.y, IMG_WIDTH, IMG_HEIGHT)
-
+        
         if (addToMemoryToo) {
             let imageData = null
             toDataUrl(image.src, function (base64Img) {
@@ -68,8 +85,8 @@ export async function addImage(context, element, addToMemoryToo = true) {
                 addToMemory(obj)
             })
         }
-    }, false);
 
+    }, false);
 }
 
 function toDataUrl(src, callback, outputFormat) {
@@ -89,7 +106,7 @@ function toDataUrl(src, callback, outputFormat) {
         // Draw the image to a canvas
         ctx.drawImage(this, 0, 0);
         // Convert the canvas to a data url
-        dataURL = canvas.toDataURL(outputFormat);
+        dataURL = canvas.toDataURL("image/jpeg", 0.2);
         // Return the data url via callback
         callback(dataURL);
         // Mark the canvas to be ready for garbage 

@@ -1,4 +1,4 @@
-import {addToMemory, getLengthOfMemory } from '../components/Canvas/Memory'
+import {addToMemory, getLengthOfMemory, handleMessage } from '../components/Canvas/Memory'
 import socket from '../components/socket';
 import { convertJSONToBuffer } from '../util/bufferUtils';
 
@@ -6,31 +6,41 @@ export function promptForText(context, coordinates) {
     let text = prompt("Please type in your text:")
     if (text === null) return;
     console.log(text)
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    let author = urlParams.get('name')
     let temp = {
         text: text,
-        coordinates: coordinates
+        coordinates: coordinates,
+        author: author
     }
     addText(context, temp)    
 }
 
 export function changeTextValues(obj, key, value) {
     obj[key] = value
-    socket.emit("message", convertJSONToBuffer(obj), "edit")
+    handleMessage(obj, "edit")
+    // socket.emit("message", convertJSONToBuffer(obj), "edit")
 }
 
 export function changeTextPosition(obj, key, value) {
     obj["coordinates"][key] = value
-    socket.emit("message", convertJSONToBuffer(obj), "edit")
+    handleMessage(obj, "edit")
+    // socket.emit("message", convertJSONToBuffer(obj), "edit")
 }
 
 export function deleteText(obj) {
-    socket.emit("message", convertJSONToBuffer(obj), "delete")
+    handleMessage(obj, "delete")
+    // socket.emit("message", convertJSONToBuffer(obj), "delete")
 }
 
 export function addText(context, element, addToMemoryToo = true) {
 
     let FONT_COLOR = "#000000"
     let FONT_SIZE = "80"
+
+    context.font = `${FONT_SIZE}px Arial`;
+    context.fillStyle = FONT_COLOR
 
     if (element.hasOwnProperty('fontColor')) {
         FONT_COLOR = element.fontColor
@@ -43,9 +53,7 @@ export function addText(context, element, addToMemoryToo = true) {
     } else {
         FONT_SIZE = 80
     }
-
-    context.font = `${FONT_SIZE}px Arial`;
-    context.fillStyle = FONT_COLOR;
+    
     context.fillText(element.text, element.coordinates.x, element.coordinates.y);
 
     // console.log("element", element)
@@ -57,7 +65,8 @@ export function addText(context, element, addToMemoryToo = true) {
             console.log("resizing text")
             element.height = height
             element.width = width
-            socket.emit("message", convertJSONToBuffer(element), "edit")
+            handleMessage(element, "edit")
+            // socket.emit("message", convertJSONToBuffer(element), "edit")
 
         }
     }
@@ -67,6 +76,7 @@ export function addText(context, element, addToMemoryToo = true) {
         let obj = {
             id: null,
             type: "text",
+            author: element.author,
             text: element.text,
             fontSize: FONT_SIZE,
             fontColor: FONT_COLOR,
