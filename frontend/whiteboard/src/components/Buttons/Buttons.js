@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { setImage } from '../../messages/image';
+import { getUndoCache, undoAction } from '../Canvas/Memory';
 
 import "./Buttons.css"
 
@@ -12,7 +13,7 @@ export default class Buttons extends Component {
     render() {
 
         function undoButtonPress() {
-            
+            undoAction()
         }
 
         function pressButton(buttonID) {
@@ -23,7 +24,7 @@ export default class Buttons extends Component {
             document.getElementById(buttonID).className = "pressedButton"
         }
 
-        function saveCanvasAsImage(type) {
+        function saveCanvasAsImage() {
             var link = document.getElementById('link');
             var canvas = document.getElementById('canvas');
             link.setAttribute('download', 'Canvas.png');

@@ -1,6 +1,4 @@
-import { addToMemory, getElementAt, getLengthOfMemory, handleMessage, replaceElementAt } from '../components/Canvas/Memory'
-import socket from '../components/socket';
-import { convertJSONToBuffer } from '../util/bufferUtils';
+import { addToMemory, handleMessage, pushToUndoCache } from '../components/Canvas/Memory'
 
 export function promptForNote(context, coordinates) {
     let text = prompt("Please type in the text of your note:")
@@ -12,21 +10,21 @@ export function promptForNote(context, coordinates) {
     addNote(context, element)
 }
 
-export function changeNoteValues(obj, key, value) {
+export function changeNoteValues(objOld, key, value) {
+    let obj = JSON.parse(JSON.stringify(objOld))    //Creates a deep copy of object
     obj[key] = value
-    handleMessage(obj, "edit")
-    // socket.emit("message", convertJSONToBuffer(obj), "edit")
+    handleMessage(objOld, obj, "edit")
 }
 
-export function changeNotePosition(obj, key, value) {
+export function changeNotePosition(objOld, key, value) {
+    let obj = JSON.parse(JSON.stringify(objOld))    //Creates a deep copy of object
     obj["coordinates"][key] = value
-    handleMessage(obj, "edit")
-    // socket.emit("message", convertJSONToBuffer(obj), "edit")
+    handleMessage(objOld, obj, "edit")
 }
 
-export function deleteNote(obj) {
-    handleMessage(obj, "delete")
-    // socket.emit("message", convertJSONToBuffer(obj), "delete")
+export function deleteNote(objOld) {
+    let obj = JSON.parse(JSON.stringify(objOld))    //Creates a deep copy of object
+    handleMessage(objOld, obj, "delete")
 }
 
 export function addNote(context, element, addToMemoryToo = true) {

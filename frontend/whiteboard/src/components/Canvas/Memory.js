@@ -1,12 +1,11 @@
 import { convertJSONToBuffer } from "../../util/bufferUtils";
 import socket from "../socket";
-import { test } from "./messageManager";
 
 let memory = new Map()
 let undoCache = []
 
 export function addToMemory(obj) {
-    handleMessage(obj, "create")
+    handleMessage(null, obj, "create")
 }
 
 export function checkIfMouseOnObject(coordinates) {
@@ -50,12 +49,9 @@ export function getElementAt(id) {
     return memory.get(id)
 }
 
-export function replaceElementAt(obj) {
-    handleMessage(obj, "edit")
-}
-
 export function clearMemory() {
     memory.clear()
+    undoCache.length = 0
 }
 
 export function removeElementAt(id, obj = null) {
@@ -63,15 +59,46 @@ export function removeElementAt(id, obj = null) {
     if (obj != null) {
         obj = getElementAt(id)
     }
-    handleMessage(obj, "delete")
+    handleMessage(obj, obj, "delete")
 }
 
-export function handleMessage(data, action, sendToServer=true) {
-    if (sendToServer) {
-        let temp = convertJSONToBuffer(data)
-        undoCache.push(data)
-        socket.emit("message", temp, action)
+export function pushToUndoCache(dataOld, dataNew, action) {
+    dataNew = JSON.parse(JSON.stringify(dataNew)) // Create deep copy
+    dataNew.action = action
+    dataNew.previousData = dataOld
+    undoCache.push(dataNew)
+    console.log(undoCache)
+}
+
+export function undoAction() {
+    if (undoCache.length !== 0) {
+        console.log(undoCache)
+        let data = undoCache.pop()
+        console.log(data)
+        console.log(undoCache)
+        // Sanatize so it looks identical as normal data
+        let action = data.action
+        let previousData = data.previousData
+        // delete data.previousData
+        // delete data.action
+
+        if (action == "create") {
+            handleMessage(data, data, "delete", true, false)
+        }
+        else if (action == "edit") {
+            handleMessage(previousData, previousData, "edit", true, false)
+        }
+        else if (action == "delete") {
+            handleMessage(previousData, previousData, true, false)
+        }
+        else {
+            console.log("Error, action for undoing unknown")
+        }
     }
+}
+
+export function handleMessage(dataOld, data, action, sendToServer = true, pushToCache = true) {
+    console.log("messageHandler", dataOld, data, action, sendToServer, pushToCache)
     if (action === 'create') {
         console.log("creating ", data.type)
         data.id = memory.size;
@@ -81,9 +108,19 @@ export function handleMessage(data, action, sendToServer=true) {
         memory.set(data.id, data)
     } else if (action == 'delete') {
         console.log("Deleting ", data.type)
-        memory.delete(data.id)
+        console.log(memory.delete(data.id))
+        console.log(memory)
+        console.log(data)
     } else {
         console.log("--- Warning ---")
         console.log("Received unknown action")
+        console.log(dataOld, data, action, sendToServer, pushToCache)
+    }
+    if (sendToServer) {
+        let temp = convertJSONToBuffer(data)
+        socket.emit("message", temp, action)
+        if (pushToCache) {
+            pushToUndoCache(dataOld, data, action)
+        }
     }
 }

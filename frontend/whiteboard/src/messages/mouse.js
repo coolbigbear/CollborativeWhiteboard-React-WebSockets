@@ -14,16 +14,17 @@ export function handleMouse(mouseData, action, callback, socket) {
     // console.log("action is", action)
     // console.log(mouseData)
     if (action == 'moveObject') {
-        let obj = checkIfMouseOnObject(mouseData.coordinates.start)
-        if (obj != null) {
+        let objOld = checkIfMouseOnObject(mouseData.coordinates.start)
+        if (objOld != null) {
+            let obj = JSON.parse(JSON.stringify(objOld))
             obj.coordinates.x += mouseData.coordinates.end.x - mouseData.coordinates.start.x;
             obj.coordinates.y += mouseData.coordinates.end.y - mouseData.coordinates.start.y;
-            handleMessage(obj, "edit")
+            handleMessage(objOld, obj, "edit")
         }
     } else if (action == 'delete') {
         let obj = checkIfMouseOnObject(mouseData.coordinates.start)
         if (obj != null) {
-            handleMessage(obj, "delete")
+            handleMessage(obj, obj, "delete")
         }
     } else {
         console.log("--- Warning ---")

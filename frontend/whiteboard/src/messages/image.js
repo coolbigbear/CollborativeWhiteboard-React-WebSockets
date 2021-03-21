@@ -1,6 +1,4 @@
-import { addToMemory, getElementAt, getLengthOfMemory, handleMessage, replaceElementAt } from '../components/Canvas/Memory'
-import socket from '../components/socket';
-import { convertJSONToBuffer } from '../util/bufferUtils';
+import { addToMemory, getElementAt, getLengthOfMemory, handleMessage } from '../components/Canvas/Memory'
 
 let img = null;
 
