@@ -1,4 +1,4 @@
-import { addToMemory, handleMessage, pushToUndoCache } from '../components/Canvas/Memory'
+import { addToMemory } from '../components/Canvas/Memory'
 
 export function promptForNote(context, coordinates) {
     let text = prompt("Please type in the text of your note:")
@@ -8,23 +8,6 @@ export function promptForNote(context, coordinates) {
         coordinates: coordinates
     }
     addNote(context, element)
-}
-
-export function changeNoteValues(objOld, key, value) {
-    let obj = JSON.parse(JSON.stringify(objOld))    //Creates a deep copy of object
-    obj[key] = value
-    handleMessage(objOld, obj, "edit")
-}
-
-export function changeNotePosition(objOld, key, value) {
-    let obj = JSON.parse(JSON.stringify(objOld))    //Creates a deep copy of object
-    obj["coordinates"][key] = value
-    handleMessage(objOld, obj, "edit")
-}
-
-export function deleteNote(objOld) {
-    let obj = JSON.parse(JSON.stringify(objOld))    //Creates a deep copy of object
-    handleMessage(objOld, obj, "delete")
 }
 
 export function addNote(context, element, addToMemoryToo = true) {

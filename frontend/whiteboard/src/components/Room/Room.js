@@ -5,6 +5,7 @@ import Canvas from '../Canvas/Canvas'
 import socket from '../socket'
 import { convertBufferToMap } from '../../util/bufferUtils'
 import { setMemory } from '../Canvas/Memory'
+import { test } from '../Canvas/messageManager'
 
 const Room = ({ location }) => {
 
@@ -17,6 +18,7 @@ const Room = ({ location }) => {
 
         setName(name);
         setRoom(room);
+        test()
 
         socket.emit("initCanvas")
 

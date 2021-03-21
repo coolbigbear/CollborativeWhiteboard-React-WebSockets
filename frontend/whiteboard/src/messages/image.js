@@ -2,23 +2,6 @@ import { addToMemory, getElementAt, getLengthOfMemory, handleMessage } from '../
 
 let img = null;
 
-export function changeImageValues(obj, key, value) {
-    obj[key] = value
-    handleMessage(obj, "edit")
-    // socket.emit("message", convertJSONToBuffer(obj), "edit")
-}
-
-export function changeImagePosition(obj, key, value) {
-    obj["coordinates"][key] = value
-    handleMessage(obj, "edit")
-    // socket.emit("message", convertJSONToBuffer(obj), "edit")
-}
-
-export function deleteImage(obj) {
-    handleMessage(obj, "delete")
-    // socket.emit("message", convertJSONToBuffer(obj), "delete")
-}
-
 export function setImage(url) {
     console.log("Setting img to be: ", url)
     img = url;
@@ -104,7 +87,7 @@ function toDataUrl(src, callback, outputFormat) {
         // Draw the image to a canvas
         ctx.drawImage(this, 0, 0);
         // Convert the canvas to a data url
-        dataURL = canvas.toDataURL("image/jpeg", 0.2);
+        dataURL = canvas.toDataURL("image/jpeg", 0.1);
         // Return the data url via callback
         callback(dataURL);
         // Mark the canvas to be ready for garbage 

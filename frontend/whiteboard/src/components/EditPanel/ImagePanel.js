@@ -1,11 +1,5 @@
 import React from 'react'
-import { changeImagePosition, changeImageValues, deleteImage } from '../../messages/image';
-import { changeNoteValues, changeNotePosition, deleteNote } from '../../messages/note'
-import { getElementAt, removeElementAt } from '../Canvas/Memory'
-import socket from '../socket';
-
-
-
+import { changeObjectPosition, changeObjectValues, deleteObj } from '../../messages/generic';
 class NotePanel extends React.Component {
 
     constructor(props) {
@@ -25,7 +19,7 @@ class NotePanel extends React.Component {
                     type="number"
                     value={this.props.object.width}
                     onChange={(event) => {
-                        changeImageValues(this.props.object, "width", parseInt(event.target.value))
+                        changeObjectValues(this.props.object, "width", parseInt(event.target.value))
                         this.props.updatePanelDrawEverything()
                         // console.log(getElementAt(this.props.object.id))
                     }}
@@ -35,7 +29,7 @@ class NotePanel extends React.Component {
                     type="number"
                     value={this.props.object.height}
                     onChange={(event) => {
-                        changeImageValues(this.props.object, "height", parseInt(event.target.value))
+                        changeObjectValues(this.props.object, "height", parseInt(event.target.value))
                         this.props.updatePanelDrawEverything()
                         // console.log(getElementAt(this.props.object.id))
                     }}
@@ -46,7 +40,7 @@ class NotePanel extends React.Component {
                     type="number"
                     value={this.props.object.coordinates.x}
                     onChange={(event) => {
-                        changeImagePosition(this.props.object, "x", parseInt(event.target.value))
+                        changeObjectPosition(this.props.object, "x", parseInt(event.target.value))
                         this.props.updatePanelDrawEverything()
                         // console.log(getElementAt(this.props.object.id))
                     }}
@@ -56,14 +50,14 @@ class NotePanel extends React.Component {
                     type="number"
                     value={this.props.object.coordinates.y}
                     onChange={(event) => {
-                        changeImagePosition(this.props.object, "y", parseInt(event.target.value))
+                        changeObjectPosition(this.props.object, "y", parseInt(event.target.value))
                         this.props.updatePanelDrawEverything()
                         // console.log(getElementAt(this.props.object.id))
                     }}
                 />
                 <button
                     onClick={() => {
-                        deleteImage(this.props.object)
+                        deleteObj(this.props.object)
                         this.props.updatePanelDrawEverything()
                     }}
                 >

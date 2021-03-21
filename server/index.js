@@ -49,7 +49,6 @@ io.on("connection", (socket) => {
 	socket.on("message", (data, action) => {
 
 		dataJSON = convertBufferToJSON(data)
-		console.log(dataJSON)
 		switch (dataJSON.type) {
 			case 'note':
 				handleMessage(dataJSON, action)

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { setImage } from '../../messages/image';
-import { getUndoCache, undoAction } from '../Canvas/Memory';
+import { undoAction } from '../Canvas/Memory';
+import { saveCanvasAsImage } from '../../util/savingCanvas';
 
 import "./Buttons.css"
 
@@ -12,24 +13,12 @@ export default class Buttons extends Component {
 
     render() {
 
-        function undoButtonPress() {
-            undoAction()
-        }
-
         function pressButton(buttonID) {
             var buttons = document.getElementById("buttonGroup").childNodes
             buttons.forEach(button => {
                 button.className = "unpressedButton"
             });
             document.getElementById(buttonID).className = "pressedButton"
-        }
-
-        function saveCanvasAsImage() {
-            var link = document.getElementById('link');
-            var canvas = document.getElementById('canvas');
-            link.setAttribute('download', 'Canvas.png');
-            link.setAttribute('href', canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
-            link.click();
         }
 
         return (
@@ -110,7 +99,7 @@ export default class Buttons extends Component {
                         console.log("Undo button clicked")
                         this.props.setMouseState('mouse')
                         pressButton("mouseButton")
-                        undoButtonPress()
+                        undoAction()
                     }}
                 >
                     Undo
@@ -118,13 +107,24 @@ export default class Buttons extends Component {
                 <button
                     id="saveAsImageButton"
                     onClick={() => {
-                        console.log("Save canvas as image button clicked")
+                        console.log("Save canvas as JPEG image button clicked")
                         this.props.setMouseState('mouse')
                         pressButton("mouseButton")
-                        saveCanvasAsImage()
+                        saveCanvasAsImage("jpeg")
                     }}
                 >
-                    Save canvas as image
+                    Save canvas as JPEG image
+                </button>
+                <button
+                    id="saveAsImageButton"
+                    onClick={() => {
+                        console.log("Save canvas as PNG image button clicked")
+                        this.props.setMouseState('mouse')
+                        pressButton("mouseButton")
+                        saveCanvasAsImage("png")
+                    }}
+                >
+                    Save canvas as PNG image
                 </button>
                 <a id="link"></a>
             </div>

@@ -11,8 +11,6 @@ export function getMouseState() {
 }
 
 export function handleMouse(mouseData, action, callback, socket) {
-    // console.log("action is", action)
-    // console.log(mouseData)
     if (action == 'moveObject') {
         let objOld = checkIfMouseOnObject(mouseData.coordinates.start)
         if (objOld != null) {

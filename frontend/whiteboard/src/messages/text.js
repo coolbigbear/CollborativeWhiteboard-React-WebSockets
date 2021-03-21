@@ -17,43 +17,25 @@ export function promptForText(context, coordinates) {
     addText(context, temp)    
 }
 
-export function changeTextValues(obj, key, value) {
-    obj[key] = value
-    handleMessage(obj, "edit")
-    // socket.emit("message", convertJSONToBuffer(obj), "edit")
-}
-
-export function changeTextPosition(obj, key, value) {
-    obj["coordinates"][key] = value
-    handleMessage(obj, "edit")
-    // socket.emit("message", convertJSONToBuffer(obj), "edit")
-}
-
-export function deleteText(obj) {
-    handleMessage(obj, "delete")
-    // socket.emit("message", convertJSONToBuffer(obj), "delete")
-}
-
 export function addText(context, element, addToMemoryToo = true) {
 
     let FONT_COLOR = "#000000"
     let FONT_SIZE = "80"
-
-    context.font = `${FONT_SIZE}px Arial`;
-    context.fillStyle = FONT_COLOR
-
+    
     if (element.hasOwnProperty('fontColor')) {
         FONT_COLOR = element.fontColor
     } else {
         FONT_COLOR = "#000000"
     }
-
+    
     if (element.hasOwnProperty('fontSize')) {
         FONT_SIZE = element.fontSize
     } else {
         FONT_SIZE = 80
     }
     
+    context.font = `${FONT_SIZE}px Arial`;
+    context.fillStyle = FONT_COLOR
     context.fillText(element.text, element.coordinates.x, element.coordinates.y);
 
     // console.log("element", element)
@@ -65,9 +47,7 @@ export function addText(context, element, addToMemoryToo = true) {
             console.log("resizing text")
             element.height = height
             element.width = width
-            handleMessage(element, "edit")
-            // socket.emit("message", convertJSONToBuffer(element), "edit")
-
+            handleMessage(element, element, "edit", false, false)
         }
     }
 

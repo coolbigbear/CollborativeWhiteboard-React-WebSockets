@@ -9,23 +9,19 @@ export function test() {
 }
 
 socket.on("poke", () => {
-    console.log("FUCK me")
-})
-
-socket.on("wow", () => {
-    console.log("why")
+    console.log("I've been poked")
 })
 
 socket.on("message", (data, action) => {
 
-    // console.log(data, action, callback)
+    // console.log("Receiving", data, action)
     // console.log(action)
     data = convertBufferToJSON(data)
     switch (data.type) {
 
         case 'note':
             // console.log("Handling note")
-            handleMessage(data, action, false);
+            handleMessage(null, data, action, false, false)
             // socket.broadcast.emit("redraw")
             // callback()
             // const activeNotes = note.notes.filter(/* take the active texts */);
@@ -33,21 +29,21 @@ socket.on("message", (data, action) => {
 
         case 'text':
             // console.log("handling text")
-            handleMessage(data, action, false);
+            handleMessage(null, data, action, false, false)
             // socket.broadcast.emit("redraw")
             // callback()
             // const activeTexts = text.texts.filter(/* take the active texts */);
             break;
 
         case 'image':
-            handleMessage(data, action, false);
+            handleMessage(null, data, action, false, false)
             // socket.broadcast.emit("redraw")
             // callback()
             // const activeImages = image.images.filter(/* take the active texts */);
             break;
 
         case 'line':
-            handleMessage(data, action, false);
+            handleMessage(null, data, action, false, false)
             // socket.broadcast.emit("redraw")
             // callback()
             // const activeDrawings = draw.drawings.filter(/* take the active texts */);

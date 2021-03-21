@@ -1,10 +1,5 @@
 import React from 'react'
-import { changeNoteValues, changeNotePosition } from '../../messages/note'
-import { changeTextPosition, changeTextValues, deleteText } from '../../messages/text';
-import { getElementAt, removeElementAt } from '../Canvas/Memory'
-
-
-
+import { changeObjectPosition, changeObjectValues, deleteObj } from '../../messages/generic';
 class NotePanel extends React.Component {
 
     constructor(props) {
@@ -37,7 +32,7 @@ class NotePanel extends React.Component {
                     type="text"
                     value={this.props.object.text}
                     onChange={(event) => {
-                        changeNoteValues(this.props.object, "text", event.target.value)
+                        changeObjectValues(this.props.object, "text", event.target.value)
                         this.props.updatePanelDrawEverything()
                         // console.log(getElementAt(this.props.object.id))
                     }}
@@ -47,7 +42,7 @@ class NotePanel extends React.Component {
                     type="number"
                     value={this.props.object.fontSize}
                     onChange={(event) => {
-                        changeTextValues(this.props.object, "fontSize", parseInt(event.target.value))
+                        changeObjectValues(this.props.object, "fontSize", parseInt(event.target.value))
                         this.props.updatePanelDrawEverything()
                         // console.log(getElementAt(this.props.object.id))
                     }}
@@ -57,7 +52,7 @@ class NotePanel extends React.Component {
                     type="color"
                     value={this.props.object.fontColor}
                     onChange={(event) => {
-                        changeTextValues(this.props.object, "fontColor", event.target.value)
+                        changeObjectValues(this.props.object, "fontColor", event.target.value)
                         this.props.updatePanelDrawEverything()
                         // console.log(getElementAt(this.props.object.id))
                     }}
@@ -68,7 +63,7 @@ class NotePanel extends React.Component {
                     type="number"
                     value={this.props.object.coordinates.x}
                     onChange={(event) => {
-                        changeTextPosition(this.props.object, "x", parseInt(event.target.value))
+                        changeObjectPosition(this.props.object, "x", parseInt(event.target.value))
                         this.props.updatePanelDrawEverything()
                         // console.log(getElementAt(this.props.object.id))
                     }}
@@ -78,14 +73,14 @@ class NotePanel extends React.Component {
                     type="number"
                     value={this.props.object.coordinates.y}
                     onChange={(event) => {
-                        changeTextPosition(this.props.object, "y", parseInt(event.target.value))
+                        changeObjectPosition(this.props.object, "y", parseInt(event.target.value))
                         this.props.updatePanelDrawEverything()
                         // console.log(getElementAt(this.props.object.id))
                     }}
                 />
                 <button
                     onClick={() => {
-                        deleteText(this.props.object)
+                        deleteObj(this.props.object)
                         this.props.updatePanelDrawEverything()
                     }}
                 >

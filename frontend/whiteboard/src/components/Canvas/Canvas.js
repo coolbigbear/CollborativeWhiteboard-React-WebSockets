@@ -11,7 +11,7 @@ import EditPanel from "../EditPanel/EditPanel";
 import socket from "../socket";
 import { convertJSONToBuffer, convertBufferToJSON, convertBufferToMap } from "../../util/bufferUtils";
 import { addImage } from "../../messages/image";
-import { clearMemory, getMemory, checkIfMouseOnObject } from "./Memory";
+import { clearMemory, getMemory, checkIfMouseOnObject, getElementAt } from "./Memory";
 
 socket.on("userApprove", (user) => {
     console.log("user approve called");
@@ -37,15 +37,15 @@ const Canvas = () => {
         console.log("Received clear canvas, clearing")
         clearCanvas()
     })
+    
+    socket.on("initCanvas", () => {
+        console.log("Initilising canvas")
+    })
 
     function sendClearCanvas(clearMemoryToo) {
         clearCanvas(clearMemoryToo)
         socket.emit("sendClearCanvas")
     }
-
-    socket.on("initCanvas", () => {
-        console.log("Initilising canvas")
-    })
 
     const clearCanvas = useCallback((clearMemoryToo = true) => {
         if (context) {
@@ -94,7 +94,11 @@ const Canvas = () => {
     window.requestAnimationFrame(drawEverything)
 
     function updatePanelDrawEverything() {
-        setUpdatePanel(!updatePanel)
+        if (getElementAt(selectedObject.id) === undefined) {
+            console.log("selectedObject is not in memory")
+            setSelectedObject(undefined)
+        }
+        setSelectedObject(getElementAt(selectedObject.id))
     }
 
     useEffect(() => {
@@ -199,26 +203,11 @@ const Canvas = () => {
                     drawLine(context, mouseCoordinates);
                 }
                 else if (getMouseState().match('mouse')) {
-                    // let buf = convertJSONToBuffer({ type: "mouse", coordinates: mouseCoordinates })
-                    // socket.emit("message", buf, "moveObject", () => {
-                    //     // window.requestAnimationFrame(drawEverything)
-                    //     drawEverything()
-                    // })
                     handleMouse({ coordinates: mouseCoordinates }, "moveObject")
-                    // drawEverything()
                 }
                 
                 else if (getMouseState().match('eraser')) {
-                    // let objectToErase = null;
-                    // let buf = convertJSONToBuffer({ type: "mouse", coordinates: mouseCoordinates })
-                    // socket.emit("message", buf, "delete")
-                    // if (objectToErase !== undefined || objectToErase != null) {
-                        //     removeElementAt(objectToErase.id);
-                    //     drawEverything()
-                    // }
-                    handleMouse({ coordinates: mouseCoordinates }, "delete")
-                    // drawEverything()
-                    
+                    handleMouse({ coordinates: mouseCoordinates }, "delete") 
                 }
             }
         }

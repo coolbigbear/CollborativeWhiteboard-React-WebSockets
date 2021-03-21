@@ -9,9 +9,9 @@ export function addToMemory(obj) {
 }
 
 export function checkIfMouseOnObject(coordinates) {
-
-    for (let i = memory.size; i > 0; i--) {
-        let value = memory.get(i - 1)
+    let array = Array.from(memory, ([key, value]) => value);
+    for (let i = array.length; i > 0; i--) {
+        let value = array[i - 1]
         if (value != null) {
             if (value.type === "line") {
                 if (coordinates.x >= value.coordinates.start.x && coordinates.x <= value.coordinates.start.x + value.width && coordinates.y >= value.coordinates.start.y - value.height && coordinates.y <= value.coordinates.start.y + value.height) {
@@ -66,21 +66,20 @@ export function pushToUndoCache(dataOld, dataNew, action) {
     dataNew = JSON.parse(JSON.stringify(dataNew)) // Create deep copy
     dataNew.action = action
     dataNew.previousData = dataOld
+    // console.log("Pushing", dataNew)
     undoCache.push(dataNew)
-    console.log(undoCache)
 }
 
 export function undoAction() {
     if (undoCache.length !== 0) {
-        console.log(undoCache)
         let data = undoCache.pop()
-        console.log(data)
-        console.log(undoCache)
-        // Sanatize so it looks identical as normal data
+        // console.log(data)
         let action = data.action
+        // console.log(action)
         let previousData = data.previousData
-        // delete data.previousData
-        // delete data.action
+        // Sanatize so it looks identical as normal data
+        delete data.previousData
+        delete data.action
 
         if (action == "create") {
             handleMessage(data, data, "delete", true, false)
@@ -89,7 +88,7 @@ export function undoAction() {
             handleMessage(previousData, previousData, "edit", true, false)
         }
         else if (action == "delete") {
-            handleMessage(previousData, previousData, true, false)
+            handleMessage(previousData, previousData, "create", true, false)
         }
         else {
             console.log("Error, action for undoing unknown")
@@ -98,23 +97,23 @@ export function undoAction() {
 }
 
 export function handleMessage(dataOld, data, action, sendToServer = true, pushToCache = true) {
-    console.log("messageHandler", dataOld, data, action, sendToServer, pushToCache)
+    // console.log("messageHandler", dataOld, data, action, sendToServer, pushToCache)
     if (action === 'create') {
         console.log("creating ", data.type)
-        data.id = memory.size;
+        if (!data.hasOwnProperty("id")) { // Check if data already has ID, if not set it.
+            data.id = Math.floor(Math.random() * 100000);
+        }
         memory.set(data.id, data)
-        // console.log(memory)
     } else if (action == 'edit') {
         memory.set(data.id, data)
     } else if (action == 'delete') {
         console.log("Deleting ", data.type)
-        console.log(memory.delete(data.id))
-        console.log(memory)
-        console.log(data)
+        memory.delete(data.id)
+        // console.log(memory)
     } else {
         console.log("--- Warning ---")
         console.log("Received unknown action")
-        console.log(dataOld, data, action, sendToServer, pushToCache)
+        // console.log(dataOld, data, action, sendToServer, pushToCache)
     }
     if (sendToServer) {
         let temp = convertJSONToBuffer(data)
