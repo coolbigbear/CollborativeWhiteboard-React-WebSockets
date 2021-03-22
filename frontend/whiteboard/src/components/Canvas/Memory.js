@@ -98,10 +98,11 @@ export function undoAction() {
 
 export function handleMessage(dataOld, data, action, sendToServer = true, pushToCache = true) {
     // console.log("messageHandler", dataOld, data, action, sendToServer, pushToCache)
+    // console.log(memory)
     if (action === 'create') {
         console.log("creating ", data.type)
         if (!data.hasOwnProperty("id")) { // Check if data already has ID, if not set it.
-            data.id = Math.floor(Math.random() * 100000);
+            data.id = Math.floor(Math.random() * 1000000000);
         }
         memory.set(data.id, data)
     } else if (action == 'edit') {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useHistory } from 'react-router-dom'
 
 import "./Canvas.css";
 import { addText, promptForText } from "../../messages/text"
@@ -9,12 +10,13 @@ import { addNote } from "../../messages/note";
 import Buttons from "../Buttons/Buttons";
 import EditPanel from "../EditPanel/EditPanel";
 import socket from "../socket";
-import { convertJSONToBuffer, convertBufferToJSON, convertBufferToMap } from "../../util/bufferUtils";
+import { convertBufferToJSON, convertJSONToBuffer } from "../../util/bufferUtils";
 import { addImage } from "../../messages/image";
 import { clearMemory, getMemory, checkIfMouseOnObject, getElementAt } from "./Memory";
 
 socket.on("userApprove", (user) => {
     console.log("user approve called");
+    user = convertBufferToJSON(user)
     let answer = window.confirm(`Approve user: ${user.name}`);
     let temp = convertJSONToBuffer({ type: "user", user: user })
     console.log(answer)
@@ -25,21 +27,23 @@ socket.on("userApprove", (user) => {
     }
 })
 
-const Canvas = () => {
+const Canvas = (props) => {
     const canvasRef = useRef(null);
     const mouseDown = useRef(false);
     const [context, setContext] = useState(null);
     const [color, setColor] = useState('#00000');
     const [selectedObject, setSelectedObject] = useState(null)
     const [updatePanel, setUpdatePanel] = useState(false)
+    const history = useHistory();
 
     socket.on("clearCanvas", () => {
         console.log("Received clear canvas, clearing")
         clearCanvas()
     })
-    
-    socket.on("initCanvas", () => {
-        console.log("Initilising canvas")
+
+    socket.on("kickUser", () => {
+        console.log("Going ")
+        history.push("/")
     })
 
     function sendClearCanvas(clearMemoryToo) {
@@ -56,12 +60,14 @@ const Canvas = () => {
                 // socket.emit("clearMemory")
                 setSelectedObject(undefined)
             }
-            context.clearRect(
-                0,
-                0,
-                canvasRef.current.width,
-                canvasRef.current.height
-            );
+            if (canvasRef.current != null) {
+                context.clearRect(
+                    0,
+                    0,
+                    canvasRef.current.width,
+                    canvasRef.current.height
+                );
+            }
 
         }
     }, [context])
@@ -148,7 +154,7 @@ const Canvas = () => {
             else if (getMouseState().match('mouse')) {
                 // console.log("mouse down", start)
                 setSelectedObject(checkIfMouseOnObject(start))
-                console.log(checkIfMouseOnObject(start))
+                // console.log(checkIfMouseOnObject(start))
             }
             else if (getMouseState().match('note')) {
                 let element = {
@@ -231,7 +237,7 @@ const Canvas = () => {
                     width="1500"
                     height="800"
                 ></canvas>
-                <Buttons sendClearCanvas={sendClearCanvas} setMouseState={setMouseState}></Buttons>
+                <Buttons sendClearCanvas={sendClearCanvas} setMouseState={setMouseState} room={props.room}></Buttons>
             </div>
             <div id="right">
                 <EditPanel selectedObject={selectedObject} updatePanel={updatePanel} updatePanelDrawEverything={updatePanelDrawEverything}></EditPanel>

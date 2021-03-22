@@ -18,6 +18,7 @@ class EditPanel extends React.Component {
 
         if (this.props.selectedObject === undefined || this.props.selectedObject == null) {
             type = ""
+            panel = <p>No item selected</p>
         } else {
             type = this.props.selectedObject.type
 
@@ -35,7 +36,7 @@ class EditPanel extends React.Component {
                     panel = <ImagePanel object={this.props.selectedObject} updatePanelDrawEverything={this.props.updatePanelDrawEverything}></ImagePanel>
                     break;
                 default:
-                    <p>No item selected</p>
+                    panel = <p>No item selected</p>
             }
         }
 

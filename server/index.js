@@ -3,10 +3,9 @@ const socketio = require("socket.io");
 const http = require("http");
 
 const router = require("./router");
-const { addUser, getUser, getUsersInRoom, getAdminInRoom, removeUser } = require("./users");
-const { getMemory, getMemorySorted, clearMemory, handleMessage } = require("./messages/messagesManager");
-const { handleMouse } = require("./messages/mouse");
-const { convertJSONToBuffer, convertBufferToJSON, convertMapToBuffer } = require("./util/bufferUtils");
+const { addUser, getUser, getAdminInRoom, removeUser, clearUsers } = require("./users");
+const { getMemory, clearMemory, handleMessage } = require("./messages/messagesManager");
+const { convertBufferToJSON, convertMapToBuffer, convertJSONToBuffer } = require("./util/bufferUtils");
 
 const PORT = process.env.PORT || 5000;
 const app = express();
@@ -31,16 +30,18 @@ io.on("connection", (socket) => {
 		const { error, approval, user } = addUser(socket.id, name, room)
 
 		if (error) {
-			return callback({ error: error });
+			return callback(convertJSONToBuffer({ error: error }));
 		}
 
 		if (approval) {
 			let admin = getAdminInRoom(room)
-			let adminID = admin.id
-			console.log(adminID)
-			io.to(adminID).emit("userApprove", user)
-			let error = { error: "Waiting for host to approve" }
-			return callback(error)
+			if (admin != null) {
+				let adminID = admin.id
+				console.log(adminID)
+				io.to(adminID).emit("userApprove", convertJSONToBuffer(user))
+				let error = { error: "Waiting for host to approve" }
+				return callback(convertJSONToBuffer(error))
+			}
 		} else {
 			callback()
 		}
@@ -123,7 +124,18 @@ io.on("connection", (socket) => {
 
 	socket.on("disconnect", () => {
 		// Remove disconnected user
-		removeUser(socket.id)
+		let user = getUser(socket.id)
+		if (user != null) {
+			if (user.admin) {
+				console.log("ADMIN LEFT, clearing board and kicking everyone out")
+				clearMemory()
+				socket.broadcast.emit("clearCanvas")
+				console.log("Kicking users")
+				socket.broadcast.emit("kickUser")
+				clearUsers()
+			}
+			removeUser(socket.id)
+		}
 		console.log("we have lost conenction!!");
 	});
 });

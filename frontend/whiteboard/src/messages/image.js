@@ -54,7 +54,6 @@ export async function addImage(context, element, addToMemoryToo = true) {
             toDataUrl(image.src, function (base64Img) {
                 imageData = base64Img;
                 let obj = {
-                    id: null,
                     type: "image",
                     imageData: imageData,
                     height: IMG_HEIGHT,

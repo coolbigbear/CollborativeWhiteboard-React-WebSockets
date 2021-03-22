@@ -59,7 +59,7 @@ export function addNote(context, element, addToMemoryToo = true) {
 
     // TODO: Currently BROKEN
     if (width > NOTE_WIDTH) { // Text too long, need multiple fillText calls
-        // console.log("Splitting text")
+        console.log("Splitting text by space")
         // let calls = Math.ceil(width / NOTE_WIDTH)
         // console.log(calls)
         // let textArray = element.text.match(/.{1,calls}/g || [])

@@ -127,6 +127,7 @@ export default class Buttons extends Component {
                     Save canvas as PNG image
                 </button>
                 <a id="link"></a>
+                <p>Room no: {this.props.room}</p>
             </div>
         )
     }

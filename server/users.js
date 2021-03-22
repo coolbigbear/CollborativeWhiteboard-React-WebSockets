@@ -41,6 +41,10 @@ const removeUser = (id) => {
     }
 }
 
+const clearUsers = () => {
+    users.length = 0
+}
+
 const getUser = (id) => {
     console.log(users)
     return users.find(user => user.id == id)
@@ -54,4 +58,4 @@ const getUsersInRoom = (room) => {
     return users.filter((user) => user.room === room)
 }
 
-module.exports = { addUser, removeUser, getUser, getUsersInRoom, getAdminInRoom };
+module.exports = { addUser, removeUser, getUser, getUsersInRoom, getAdminInRoom, clearUsers };

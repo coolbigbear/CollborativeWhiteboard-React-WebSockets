@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 
-import './Join.css';
 import socket from '../socket'
+import { convertBufferToJSON, convertBufferToMap } from '../../util/bufferUtils';
+import { setMemory } from '../Canvas/Memory';
 
 const Join = () => {
 
@@ -10,11 +11,20 @@ const Join = () => {
     const [room, setRoom] = useState(123456);
     const history = useHistory();
 
+    
     useEffect(() => {
         socket.on("approved", (user) => {
-            console.log("approve")
+            console.log("approved")
             alert("Host has approved")
-            history.push(`/room?room=${user.room}&name=${user.name}`)
+            socket.emit("initCanvas")
+    
+            socket.on("initCanvas", (memory) => {
+                console.log("Incoming whiteboard data")
+                console.log("INCOMING MEMORY", convertBufferToMap(memory))
+                setMemory(convertBufferToMap(memory))
+                console.log("Converting user")
+                history.push(`/room?room=${user.room}&name=${user.name}`)
+            })
         })
 
         socket.on("denied", (user) => {
@@ -30,18 +40,25 @@ const Join = () => {
 
     async function generateRandomRoomNo() {
         let roomNo = Math.floor(100000 + Math.random() * 900000)
+        roomNo = roomNo.toString()
         console.log("Generating Random room no")
-        history.push(`/room?room=${roomNo}&name=${name}`)
+        emitJoin(name, roomNo)
     }
 
     function joinAlreadyCreatedRoom() {
+        emitJoin(name, room)
+    }
+
+    function emitJoin(name, room) {
+        setRoom(room)
+        setName(name)
         socket.emit('join', { name, room }, (status) => {
-            console.log(status)
             if (status) {
+                console.log("Converting join status")
+                status = convertBufferToJSON(status)
+                console.log(status)
                 alert(status.error)
-            }
-            else {
-                // alert(status.data)
+            } else {
                 history.push(`/room?room=${room}&name=${name}`)
             }
         });

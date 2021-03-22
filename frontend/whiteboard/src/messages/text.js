@@ -54,7 +54,6 @@ export function addText(context, element, addToMemoryToo = true) {
     if (addToMemoryToo) {
         console.log("adding text to memory ", element)
         let obj = {
-            id: null,
             type: "text",
             author: element.author,
             text: element.text,

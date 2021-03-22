@@ -58,9 +58,7 @@ function removeElementAt(id, obj=null) {
 function handleMessage(data, action) {
     if (action === 'create') {
         console.log("creating ", data.type)
-        data.id = memory.size;
         memory.set(data.id, data)
-        // console.log(memory)
     } else if (action == 'edit') {
         memory.set(data.id, data)
     } else if (action == 'delete') {
