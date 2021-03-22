@@ -60,7 +60,9 @@ export function addText(context, element, addToMemoryToo = true) {
             fontSize: FONT_SIZE,
             fontColor: FONT_COLOR,
             coordinates: element.coordinates,
-            selected: false
+            selected: false,
+            width: 0,
+            height: 0
         }
         let dimensions = calculateTextWidth(context, obj)
         obj.width = dimensions.width

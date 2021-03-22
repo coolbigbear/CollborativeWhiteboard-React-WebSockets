@@ -50,6 +50,12 @@ const Join = () => {
     }
 
     function emitJoin(name, room) {
+        if (name == null) {
+            name = ""
+        }
+        else if (room == null) {
+            room = ""
+        }
         setRoom(room)
         setName(name)
         socket.emit('join', { name, room }, (status) => {
