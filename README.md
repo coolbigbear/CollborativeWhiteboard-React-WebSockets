@@ -1,6 +1,8 @@
-# Internet Protocols - Whiteboard
+# Internet Protocols Project - Whiteboard application
 
-Changes made to any files are updated automatically if the server is running and the file is saved. Meaning you don't need to re-run these commands everytime you make a change.
+A React application with a Node.js server allowing you to collaborate on a whiteboard.
+
+![join form](images/fullApp.png)
 
 ## Usage
 ### Setup for the frontend
@@ -34,31 +36,79 @@ Changes made to any files are updated automatically if the server is running and
        npm start
 
 ## Message structures
+---
 ### Types of message
 
 1. Message for joining
 2. Message for disconnecting
-3. Message for editing the whiteboard
+3. Message for editing a whiteboard object
 
 ### Message for editing a whiteboard item
 
 1. Note:
-       Create,
-       Move,
-       Edit,
-       Delete
+
+       {
+              type: “note”,
+              id: 123,
+              text: “text”,
+              fontSize: 10,
+              fillColor: “#FFFFFF”,
+              fontColor: “#FFFFFF”,
+              action: “create”,
+              height: 100,
+              width: 100, 
+              Coordinates: {
+                     xPos: 123,
+                     yPos: 123
+              }
+       }
+
 2. Text:
-       Create,
-       Move,
-       Edit,
-       Delete
+
+       {
+              type: “text”,
+              id: 123,
+              text: “text”,
+              fontSize: 10,
+              fontColor: “#FFFFFF”,
+              action: “create”,
+              height: 10,
+              width: 10, 
+              Coordinates: {
+                     xPos: 123,
+                     yPos: 123
+              }
+       }
+
 3. Image:
-       Create,
-       Move,
-       Delete
+
+       {
+              type: “image”,
+              id: 123
+              action: “create”,
+              imageData: data,
+              height: 100,
+              width: 100, 
+              Coordinates: {
+                     xPos: 123,
+                     yPos: 123
+              }
+       }
+
 4. Draw:
-       Create (Draw),
-       Delete (Erase)
+
+       {
+              type: “line”,
+              id: 123,
+              action: “create”,
+              height: 10,
+              width: 10, 
+              Coordinates: {
+                     xPos: 123,
+                     yPos: 123
+              }
+       }
+
 
 
 
