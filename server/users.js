@@ -3,7 +3,7 @@ const users = [];
 const addUser = (id, name, room) => {
 
     let admin = false;
-    
+    room = room.toString()
     name = name.trim().toLowerCase();
     room = room.trim().toLowerCase();
 
@@ -46,7 +46,6 @@ const clearUsers = () => {
 }
 
 const getUser = (id) => {
-    console.log(users)
     return users.find(user => user.id == id)
 };
 

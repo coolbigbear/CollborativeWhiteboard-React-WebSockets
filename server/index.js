@@ -18,6 +18,7 @@ io.set("transports", ["websocket"]);
 io.on("connection", (socket) => {
 
 	console.log("connection")
+	initCanvas(socket)
 
 	socket.on("poke", () => {
 		console.log("youve been poked")
@@ -103,17 +104,7 @@ io.on("connection", (socket) => {
 	});
 
 	socket.on("initCanvas", () => {
-		console.log("Initilising canvas for new user")
-		console.log("Socket ID", socket.id)
-		let user = getUser(socket.id)
-		console.log("USER", user)
-		if (user != null) {
-			let admin = getAdminInRoom(user.room)
-			if (admin != null) {
-				// Send back current whiteboard data
-				io.to(socket.id).emit("initCanvas", convertMapToBuffer(getMemory()))
-			}
-		}
+		initCanvas(socket)
 	})
 
 	socket.on("sendClearCanvas", () => {
@@ -139,6 +130,15 @@ io.on("connection", (socket) => {
 		console.log("we have lost conenction!!");
 	});
 });
+
+function initCanvas(socket) {
+	console.log("Initilising canvas for new user")
+	console.log("Socket ID", socket.id)
+	let user = getUser(socket.id)
+	console.log("USER", user)
+	// Send back current whiteboard data
+	io.to(socket.id).emit("initCanvas", convertMapToBuffer(getMemory()))
+}
 
 app.use(router);
 

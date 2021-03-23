@@ -10,9 +10,9 @@ import { addNote } from "../../messages/note";
 import Buttons from "../Buttons/Buttons";
 import EditPanel from "../EditPanel/EditPanel";
 import socket from "../socket";
-import { convertBufferToJSON, convertJSONToBuffer } from "../../util/bufferUtils";
+import { convertBufferToJSON, convertBufferToMap, convertJSONToBuffer } from "../../util/bufferUtils";
 import { addImage } from "../../messages/image";
-import { clearMemory, getMemory, checkIfMouseOnObject, getElementAt } from "./Memory";
+import { clearMemory, getMemory, checkIfMouseOnObject, getElementAt, setMemory } from "./Memory";
 
 socket.on("userApprove", (user) => {
     console.log("user approve called");
@@ -25,6 +25,13 @@ socket.on("userApprove", (user) => {
     } else {
         socket.emit("message", temp, "denied")
     }
+})
+
+socket.on("initCanvas", (memory) => {
+    console.log("Incoming whiteboard data")
+    console.log("INCOMING MEMORY", convertBufferToMap(memory))
+    setMemory(convertBufferToMap(memory))
+    console.log("Converting user")
 })
 
 const Canvas = (props) => {
